@@ -9,7 +9,7 @@ There is many different APIs on the market to achieve this task. Each one of the
 __Simple diagram__
 ![geoview-api-geolocator-diagram](https://user-images.githubusercontent.com/3472990/198357917-ba7cb402-bb81-4e46-b42d-4e00e0bdbf16.png)
 
-__Demo - comming soon!__
+[Demo](https://jolevesq.github.io/geoview-api-geolocator/index.html)
 
 ```html
 The demo with embeded viewer is being loaded in public/index.html as a script tag
