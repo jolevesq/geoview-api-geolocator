@@ -5026,10 +5026,10 @@ var GeolocatorPanelContent = function (props) {
     return ((0,jsx_runtime.jsx)("div", { children: "This is the comming soon content!" }));
 };
 
-;// CONCATENATED MODULE: ./public/locales/en-CA/translation.json
+;// CONCATENATED MODULE: ./public/locales/en/translation.json
 const translation_namespaceObject = JSON.parse('{"custom":{"geolocatorPanelTitle":"Geolocator API Demo"}}');
-;// CONCATENATED MODULE: ./public/locales/fr-CA/translation.json
-const fr_CA_translation_namespaceObject = JSON.parse('{"custom":{"geolocatorPanelTitle":"Démo Géolocalisation API"}}');
+;// CONCATENATED MODULE: ./public/locales/fr/translation.json
+const fr_translation_namespaceObject = JSON.parse('{"custom":{"geolocatorPanelTitle":"Démo Géolocalisation API"}}');
 ;// CONCATENATED MODULE: ./src/components/app.tsx
 
 // import React, { useEffect, createContext, useState, useMemo } from 'react';
@@ -5067,17 +5067,17 @@ var App = function () {
              * translations object to inject to the viewer translations
              */
             var translations = {
-                'en-CA': translation_namespaceObject,
-                'fr-CA': fr_CA_translation_namespaceObject,
+                'en': translation_namespaceObject,
+                'fr': fr_translation_namespaceObject,
             };
             // get map instance
             var mapInstance = app_cgpv.api.map('mapWM');
             // add custom languages
-            mapInstance.i18nInstance.addResourceBundle('en-CA', 'translation', translations['en-CA'], true, false);
-            mapInstance.i18nInstance.addResourceBundle('fr-CA', 'translation', translations['fr-CA'], true, false);
+            mapInstance.i18nInstance.addResourceBundle('en', 'translation', translations['en'], true, false);
+            mapInstance.i18nInstance.addResourceBundle('fr', 'translation', translations['fr'], true, false);
             // get language
             //  const { language }: { language: 'en-CA' | 'fr-CA' } = mapInstance;
-            var language = 'en-CA';
+            var language = 'en';
             var MapIcon = app_cgpv.ui.elements.MapIcon;
             // button props
             var geolocatorButton = {
@@ -5105,7 +5105,7 @@ var App = function () {
     return ((0,jsx_runtime.jsx)("div", { id: "mapWM", className: "llwp-map ".concat(classes.container), style: {
             height: '100vh',
             zIndex: 0,
-        }, "data-lang": "en", "data-config": "{\r\n        'map': {\r\n          'interaction': 'dynamic',\r\n          'viewSettings': {\r\n            'zoom': 4,\r\n            'center': [-100, 60],\r\n            'projection': 3857\r\n          },\r\n          'basemapOptions': {\r\n            'id': 'transport',\r\n            'shaded': false,\r\n            'labeled': true\r\n          }\r\n        },\r\n        'theme': 'dark',\r\n        'suportedLanguages': ['en', 'fr']\r\n        }" }));
+        }, "data-lang": "en", "data-config": "{\r\n        'map': {\r\n          'interaction': 'dynamic',\r\n          'viewSettings': {\r\n            'zoom': 4,\r\n            'center': [-100, 60],\r\n            'projection': 3857\r\n          },\r\n          'basemapOptions': {\r\n            'basemapId': 'transport',\r\n            'shaded': false,\r\n            'labeled': true\r\n          }\r\n        },\r\n        'theme': 'dark',\r\n        'suportedLanguages': ['en', 'fr']\r\n        }" }));
 };
 /* harmony default export */ const app = (App);
 
