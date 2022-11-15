@@ -1,20 +1,23 @@
-# lambda-query-geogratis
+# Prototype - lambda-query-geolator
+# includes: geogratis, mapsgoogle and nominatim
 
 import json
 import urllib.request
 
 class URL_object:
-    def __init__(self, name, url_base, address, key=""):
+    def __init__(self, name, url_base, address, dict_params={}):
         self.name = name
         self.url = url_base
-        self.key = key
+        self.params = dict_params
         self.address = address
 
     def getUrl(self, query_str):
         qry = self.url + "?"+self.address+"="+query_str
-        if self.key:
-            key_str = "&key="+self.key
-            qry += key_str
+        for key in self.params:
+            value = self.params[key]
+            param_str="&"+key+"="+value
+            qry += param_str
+
         return qry
                 
 
@@ -25,8 +28,19 @@ def lambda_handler(event, context):
     
     # Just two of them for now
     urls["geogratis"] = URL_object("geogratis","https://geogratis.gc.ca/services/geoname/en/geonames.json","q")
-    urls["mapsgoogle"] = URL_object("mapsgoogle","https://maps.googleapis.com/maps/api/geocode/json", "address", "AIzaSyASQcYTDCw4fRr_GY5WHxIAqeTsDmvAh_8")
-    
+    urls["mapsgoogle"] = URL_object("mapsgoogle","https://maps.googleapis.com/maps/api/geocode/json", "address", {"key":"AIzaSyASQcYTDCw4fRr_GY5WHxIAqeTsDmvAh_8"})
+    urls["nominatim"] = URL_object("nominatim","https://nominatim.openstreetmap.org/search", "q",{"format":"json"})
+    """
+    Schemas:
+        * geogratis:
+            - 'q': {query_string}! (! == mandatory)
+        * mapsgoogle:
+            - 'address': {query_tring}!
+            - 'key': {string}!
+        * nominatim:
+            - 'q': {query_string}!
+            - 'format':"json"
+    """
     queryStringParameters = event['queryStringParameters']
     qry_str = ""
     # Primary-query-parameter
@@ -34,7 +48,7 @@ def lambda_handler(event, context):
         response = {
             "statusCode": "400",
             "headers": {"Content-type": "application/json"},
-            "message": "'address' parameter is missing"
+            "message": "'q' parameter is missing"
         }
     else:
         query_str = queryStringParameters.get("address")
@@ -44,7 +58,6 @@ def lambda_handler(event, context):
             url_ids = list(urls.keys())
         else:
             url_ids = queryStringParameters.get("ids").split(",")
-    
         # query response
         body_dict = {}
         
@@ -58,8 +71,8 @@ def lambda_handler(event, context):
             timeout=5)
         
             loads = json.loads(query_response.read())
+
             print(loads)
-    #        items = loads["items"]
             body_dict[url_id] = (url_qry, loads)
         response = {
             "statusCode": "200",
@@ -67,4 +80,3 @@ def lambda_handler(event, context):
             "body": json.dumps(body_dict)
         }
     return response
-    
