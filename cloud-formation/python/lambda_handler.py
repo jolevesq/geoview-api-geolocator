@@ -1,4 +1,4 @@
-# Prototype - lambda-query-geolator
+# Prototype - lambda-query-test-geolocator
 # includes: geogratis, mapsgoogle and nominatim
 
 import json
