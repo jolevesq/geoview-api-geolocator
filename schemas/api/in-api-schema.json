@@ -18,7 +18,7 @@
         "lang": {
           "type": "string",
           "enum": ["en", "fr"],
-          "description": "The language on wich to filter the query. Optional parameter, if missing no filtering will be applied."
+          "description": "The language on wich to filter the query."
         },
         "keys": {
           "type": "array",
@@ -30,7 +30,7 @@
           "description": "The list of supported API key to query. Optional parameter, if missing, all supported key will be query."
         }
       },
-      "required": ["q"],
+      "required": ["q", "lang"],
       "additionalProperties": false
     }
   },
