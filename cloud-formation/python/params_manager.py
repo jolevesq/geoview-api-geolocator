@@ -15,6 +15,7 @@ def catch_unknown_param(entered_params, valid_params):
         error_message = "paramaters not required: " + unknown_params
         raise Exception(error_message)
 
+<<<<<<< HEAD
 def validate_query_string_with_schema(event, schema):
     print(schema)
     params_list = {}
@@ -100,6 +101,19 @@ def validate_query_string_with_schema(event, schema):
     """
     # Validate 'query'
     # DONE
+=======
+def validate_query_string(queryString, valid_services):
+    params_list = {}
+    # List of valids must be placed and retrieved from elsewhere
+    valid_parms = ['q','keys','lang']
+    valid_langs = ['en','fr']
+
+    # Error where there are other keys parameters not required
+    parms_keys = queryString.keys()
+    catch_unknown_param(parms_keys, valid_parms)
+
+    # Validate 'query'
+>>>>>>> e173987 (Revision services schemas & update python scripts)
     if "q" not in parms_keys:
         raise Exception("inexistent parameter 'q'")
     params_list['q'] = queryString.get("q")
@@ -113,6 +127,21 @@ def validate_query_string_with_schema(event, schema):
         catch_unknown_value(lang, valid_langs)
     params_list['lang'] = lang
     
+<<<<<<< HEAD
+=======
+    """
+    # Original validation accepting both official languages
+    # in the same query
+    
+    # Validate parameter for language
+    if "lang" not in parms_keys:
+        langs = valid_langs[0]
+    else:
+        langs = queryString.get("lang").split(',')
+        catch_unknown_param(langs, valid_langs)
+    params_list['langs'] = langs
+    """
+>>>>>>> e173987 (Revision services schemas & update python scripts)
     # Validate parameter for service
     if "keys" not in parms_keys:
         keys = valid_services
@@ -121,5 +150,9 @@ def validate_query_string_with_schema(event, schema):
         catch_unknown_param(keys, valid_services)
     params_list['keys'] = keys
     
+<<<<<<< HEAD
     """
+=======
+    # TODO: Additionally there must be a regex validation for values
+>>>>>>> e173987 (Revision services schemas & update python scripts)
     return params_list
