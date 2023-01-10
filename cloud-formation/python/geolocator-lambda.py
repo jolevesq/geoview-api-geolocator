@@ -5,20 +5,24 @@ from s3_manager import *
 import re
 
 def lambda_handler(event, context):
-    # Initilize variables and S3 Service
-    items, loads = [], []
-
+    # Initilize variables and S3 service
+    loads = []
     bucket = get_S3bucket()
-
+    
+    # Schemas
     schema_paths = get_schemas_paths(bucket)
-    print("schema paths: {}".format(schema_paths))
     apis_dict = schema_paths['apis']
     services_dict = schema_paths['services']
+    
     ### Metadata extracted from api-input-schema
-    ### TO-DO: Rules of validation from metadata 
+    ### TO-DO: Rules of validation from metadata
+    body = read_file(bucket, apis_dict["in-api"])
+    in_api_schema = json.loads(body)
+
     # 0. Read and Validate the parameters
-    queryString = event.get("params").get("querystring")
-    #params_full_list = validate_query_string_from_metadata(queryString, in_api_schema)
+    #queryString = event.get("params").get("querystring")
+    params_full_list = validate_query_string_with_schema(event,in_api_schema)
+    """
     params_full_list = validate_query_string(queryString, list(services_dict))
     keys = params_full_list.pop("keys")
 
@@ -76,7 +80,7 @@ def lambda_handler(event, context):
         
         loads.append(service_load)
 
+    """
     return {
         "services": loads
     }
-    

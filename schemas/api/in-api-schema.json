@@ -1,5 +1,4 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "API Geolocator Input Config Schema",
   "type": "object",
   "version": 1.0,
@@ -7,32 +6,44 @@
   "additionalProperties": false,
 
   "properties": {
-    "parameters": {
+    "params": {
       "type": "object",
-      "description": "Query parameter coming from the API call url (q, lang and keys).",
+      "description": "Query parameter coming from the API call url",
       "properties": {
-        "q": {
-          "type": "string",
-          "description": "The query to parse and send to supported API's."
-        },
-        "lang": {
-          "type": "string",
-          "enum": ["en", "fr"],
-          "description": "The language on wich to filter the query."
-        },
-        "keys": {
-          "type": "array",
-          "uniqueItems": true,
-          "items": {
-            "type": "string",
-            "enum": ["geonames", "nominatim", "google"]
+        "querystring": {
+          "type": "object",
+          "description": "Dictionary containing the parameters and values passed with the url",
+          "properties": {
+            "q": {
+              "type": "string",
+              "multipleItems": false,
+              "description": "The query to parse and send to supported API's."
+            },
+            "lang": {
+              "type": "string",
+              "multipleItems": false,
+              "enum": ["en", "fr"],
+              "default" : "en",
+              "description": "The language on wich to filter the query."
+            },
+            "keys": {
+              "type": "array",
+              "multipleItems": true,
+              "default" : "all",
+              "items": {
+                "type": "string"
+              },
+              "description": "The list of supported API key to query. Optional parameter, if missing, all supported keys will be queried."
+            }
           },
-          "description": "The list of supported API key to query. Optional parameter, if missing, all supported key will be query."
+          "required": ["q"],
+          "additionalProperties": false
         }
       },
-      "required": ["q", "lang"],
+      "required": ["querystring"],
       "additionalProperties": false
     }
   },
-  "required": ["parameters"]
+  "required": ["params"],
+  "additionalProperties": false
 }
