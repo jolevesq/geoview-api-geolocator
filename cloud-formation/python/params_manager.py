@@ -70,6 +70,31 @@ def validate_query_string_with_schema(event, schema):
         prop_type = property_dict["type"]
         prop_multItems = property_dict["multipleItems"] == "true"
         
+        # Replace parameter and its value by default, when it is absent from list
+        if not url_querystring.get(key):
+            if property_dict.get("multipleItems"):
+                if property_dict.get("default") == "all":
+                    property_items = property_dict.get("items")
+                    if property_items.get("type") == "file":
+                        source = property_items.get("source")
+                        if source == "services":
+                            url_querystring[key] = list(services)
+            else:
+                if property_dict.get("default"):
+                    url_querystring[key] = property_dict.get("default")
+        else:
+            if property_dict.get("multipleItems"):
+                property_items = property_dict.get("items")
+                if property_items.get("type") == "file":
+                    source = property_items.get("source")
+                    if source == "services":
+                        url_services_list = url_querystring[key].split(',')
+                        for url_service in url_services_list:
+                            if url_service not in services:
+                                error_message = "invalid value '{}' in query".format(url_service)
+                                raise Exception(error_message)
+                        url_querystring[key] = url_services_list
+            else:
         # Validate parameter value against list
         prop_enum = None
         if property_dict.get("enum"):
