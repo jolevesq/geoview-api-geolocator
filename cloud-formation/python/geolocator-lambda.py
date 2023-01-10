@@ -8,12 +8,12 @@ def lambda_handler(event, context):
     # Initilize variables and S3 service
     loads = []
     bucket = get_S3bucket()
-    
+
     # Schemas
     schema_paths = get_schemas_paths(bucket)
     apis_dict = schema_paths['apis']
     services_dict = schema_paths['services']
-    
+
     ### Metadata extracted from api-input-schema
     ### TO-DO: Rules of validation from metadata
     body = read_file(bucket, apis_dict["in-api"])
@@ -21,9 +21,11 @@ def lambda_handler(event, context):
 
     # 0. Read and Validate the parameters
     #queryString = event.get("params").get("querystring")
-    params_full_list = validate_query_string_with_schema(event,in_api_schema)
-    """
-    params_full_list = validate_query_string(queryString, list(services_dict))
+    params_full_list = validate_query_string_with_schema(event,
+                                                        in_api_schema, 
+                                                        services_dict.keys()
+    )
+    #params_full_list = validate_query_string(queryString, list(services_dict))
     keys = params_full_list.pop("keys")
 
     #Initialize the load with the list of services
@@ -38,7 +40,7 @@ def lambda_handler(event, context):
         url_params = model.get("urlParams")
         #1.1. Copy the parameters list 
         params_service_list = params_full_list.copy()
-        
+
         # 2. Parameters to modify the url
         if url_params:
             for url_param in url_params:
@@ -52,7 +54,8 @@ def lambda_handler(event, context):
         qry_params_list = []
         if lookup_in:
             for in_param in lookup_in:
-                qry_params_list.append(lookup_in.get(in_param) +"=" + params_service_list.pop(in_param))
+                qry_params_list.append(lookup_in.get(in_param) +"=" \
+                                       + params_service_list.pop(in_param))
 
         # 4. static parameters
         static_params = model.get("staticParams")
@@ -77,10 +80,11 @@ def lambda_handler(event, context):
         ###
         ###
         ###
-        
+
         loads.append(service_load)
 
-    """
+
     return {
         "services": loads
     }
+    

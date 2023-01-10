@@ -3,7 +3,7 @@ import boto3
 def get_S3bucket():
     # This name is just temporary 
     return "tutorial-bucket-test1"
-    
+
 def get_substring(str, start, end):
     return (str.split(start))[1].split(end)[0]
 
@@ -21,7 +21,7 @@ def get_objects(bucket_name):
         for obj in bucket.objects.all():
             list_obj.append(obj.key)
         return list_obj
-    
+
     except ClientError as e:
         logging.error(e)
         return False 
@@ -50,9 +50,9 @@ def get_schemas_paths(bucket_name):
         "apis": apis,
         "services": services
     }
-        
+
     return paths
-    
+
 def read_file(bucket, filename):
     """
     return the content of the object

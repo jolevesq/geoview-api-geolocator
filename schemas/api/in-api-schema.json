@@ -31,7 +31,8 @@
               "multipleItems": true,
               "default" : "all",
               "items": {
-                "type": "string"
+                "type": "file",
+                "source": "services"
               },
               "description": "The list of supported API key to query. Optional parameter, if missing, all supported keys will be queried."
             }
