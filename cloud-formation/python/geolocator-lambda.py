@@ -83,8 +83,6 @@ def lambda_handler(event, context):
 
         loads.append(service_load)
 
-
     return {
         "services": loads
     }
-    

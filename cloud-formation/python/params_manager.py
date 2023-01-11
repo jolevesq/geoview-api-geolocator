@@ -21,7 +21,7 @@ def get_value(dict, key):
     if dict.get(key):
         value = dict.get(key)
     return value
-    
+
 def validate_query_string_with_schema(event, schema, services):
     print(schema)
     params_list = {}

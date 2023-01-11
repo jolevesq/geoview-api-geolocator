@@ -11,7 +11,7 @@ __Simple diagram__
 
 [Demo](https://jolevesq.github.io/geoview-api-geolocator/index.html)
 
-Sample call to the API: https://ocni6zoj73.execute-api.ca-central-1.amazonaws.com/dev?q=meech&lang=en&keys=geomanes
+Sample call to the API: https://ocni6zoj73.execute-api.ca-central-1.amazonaws.com/dev?q=meech&lang=en&keys=geonames
 
 ```html
 The demo with embeded viewer is being loaded in public/index.html as a script tag
