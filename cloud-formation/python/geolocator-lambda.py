@@ -4,6 +4,13 @@ from params_manager import *
 from s3_manager import *
 import re
 
+IN_API = 'in-api'
+OUT_API = 'out-api'
+
+def get_schema_from_bucket(bucket, file_path):
+    body = read_file(bucket, file_path)
+    return json.loads(body)
+
 def lambda_handler(event, context):
     # Initilize variables and S3 service
     loads = []
@@ -13,11 +20,10 @@ def lambda_handler(event, context):
     schema_paths = get_schemas_paths(bucket)
     apis_dict = schema_paths['apis']
     services_dict = schema_paths['services']
-
-    ### Metadata extracted from api-input-schema
-    ### TO-DO: Rules of validation from metadata
-    body = read_file(bucket, apis_dict["in-api"])
-    in_api_schema = json.loads(body)
+    # Metadata extracted from api-input-schema
+    in_api_schema = get_schema_from_bucket(bucket, apis_dict[IN_API])
+    # Metadata extracted from api-output-schema
+    out_api_schema = get_schema_from_bucket(bucket, apis_dict[OUT_API])
 
     # 0. Read and Validate the parameters
     #queryString = event.get("params").get("querystring")
@@ -69,20 +75,22 @@ def lambda_handler(event, context):
             url += "&".join(qry_params_list)
 
         # At this point the query must be complete
+        print(f"url: {url}")
         query_response =urllib.request.urlopen(urllib.request.Request(
             url=url,
             method='GET'),
             timeout=5)
         response = query_response.read()
+        #load = { "service": service, "url": url, "Load" : json.loads(response)}
         service_load = json.loads(response)
-
+        #print(service_load)
         ### After this point is where the 'out' part of the model applies
         ###
         ###
         ###
 
-        loads.append(service_load)
+        loads.append(loads)
 
     return {
-        "services": loads
+        "response": loads
     }
