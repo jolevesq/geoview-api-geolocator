@@ -57,7 +57,7 @@ def read_file(bucket, filename):
     """
     return the content of the object
     :param bucket
-    :param filename
+    :param service
     :return: body of the file as a string
     """
     try:

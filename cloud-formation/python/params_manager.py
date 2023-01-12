@@ -21,9 +21,8 @@ def get_value(dic, key):
         value = dic.get(key)
     return value
 
-def validate_query_string_with_schema(event, schema, services):
+def validate_querystring_against_schema(event, schema):
     url_parameters = event
-    print(url_parameters)
     #type = schema["type"]
     properties = schema["properties"]
     required = schema["required"]
@@ -53,34 +52,27 @@ def validate_query_string_with_schema(event, schema, services):
     for key in properties:
         valid_parms.append(key)
         property_dict = properties[key]
-        #prop_type = property_dict["type"]
-        #prop_multItems = property_dict.get("multipleItems")
 
         # Replace absent parameter and its value by default value.
         if not url_querystring.get(key):
-            if property_dict.get("multipleItems"):
-                if property_dict.get("default") == "all":
-                    property_items = property_dict.get("items")
-                    if property_items.get("type") == "file":
-                        source = property_items.get("source")
-                        if source == "services":
-                            url_querystring[key] = list(services)
+            if property_dict.get("type") == "array":
+                property_items = property_dict.get("items")
+                url_querystring[key] = property_items.get("enum")
             else:
                 if property_dict.get("default"):
                     url_querystring[key] = property_dict.get("default")
         else:
             # match the parameter against valid values from schema or services
-            if property_dict.get("multipleItems"):
+            if property_dict.get("type") == "array":
                 property_items = property_dict.get("items")
-                if property_items.get("type") == "file":
-                    source = property_items.get("source")
-                    if source == "services":
-                        url_services_list = url_querystring[key].split(',')
-                        for url_service in url_services_list:
-                            if url_service not in services:
-                                error_message = f"invalid value '{url_service}' in query"
-                                raise Exception(error_message)
-                        url_querystring[key] = url_services_list
+                property_enum = property_items.get("enum")
+                if key == "keys":
+                    url_services_list = url_querystring[key].split(',')
+                    for url_service in url_services_list:
+                        if url_service not in property_enum:
+                            error_message = f"invalid value '{url_service}' in query"
+                            raise Exception(error_message)
+                    url_querystring[key] = url_services_list
             else:
                 # Validate single parameter value against list
                 prop_enum = get_value(property_dict,"enum")

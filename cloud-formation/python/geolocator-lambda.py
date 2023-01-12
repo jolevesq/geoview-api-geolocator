@@ -32,23 +32,17 @@ def lambda_handler(event, context):
     out_api_schema = get_schema_from_bucket(bucket, apis_dict[OUT_API])
 
     # 0. Read and Validate the parameters
-    #queryString = event.get("params").get("querystring")
-    params_full_list = validate_query_string_with_schema(event,
-                                                        in_api_schema,
-                                                        services_dict.keys()
-    )
-    #params_full_list = validate_query_string(queryString, list(services_dict))
+    params_full_list = validate_querystring_against_schema(event,in_api_schema)
     keys = params_full_list.pop("keys")
-
     #Initialize the load with the list of services
     for service in keys:
         # Get the model
-        body = read_file(bucket, services_dict[service])
+        filename = services_dict.get(service)
+        body = read_file(bucket, filename)
         model = json.loads(body)
 
         # 1. Extract url and parameters from json
         url = model.get("url")
-        print(f"url before: {url}")
         url_params = model.get("urlParams")
         #1.1. Copy the parameters list
         params_service_list = params_full_list.copy()
@@ -56,7 +50,6 @@ def lambda_handler(event, context):
         # 2. Parameters to modify the url
         if url_params:
             for url_param in url_params:
-                print(url_params)
                 param_match = "_"+url_param.upper()+"_"
                 replace_with = params_service_list.pop(url_params.get(url_param))
                 url = url.replace(param_match, replace_with)
@@ -87,7 +80,6 @@ def lambda_handler(event, context):
             method='GET'),
             timeout=5)
         response = query_response.read()
-        #load = { "service": service, "url": url, "Load" : json.loads(response)}
         service_load = json.loads(response)
         ### After this point is where the 'out' part of the model applies
         output = []

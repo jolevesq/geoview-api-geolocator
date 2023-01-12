@@ -16,26 +16,23 @@
           "properties": {
             "q": {
               "type": "string",
-              "multipleItems": false,
               "description": "The query to parse and send to supported API's."
             },
             "lang": {
               "type": "string",
-              "multipleItems": false,
               "enum": ["en", "fr"],
               "default" : "en",
               "description": "The language on wich to filter the query."
             },
             "keys": {
               "type": "array",
-              "multipleItems": true,
-              "default" : "all",
+              "uniqueItems": true,
               "items": {
-                "type": "object",
-                "source": "services"
+                "type": "string",
+                "enum": ["geonames", "nominatim"]
               },
-              "description": "The list of supported API key to query. Optional parameter, if missing, all supported keys will be queried."
-            }
+              "description": "The list of supported API key to query. Optional parameter, if missing, all supported key will be query."
+                }
           },
           "required": ["q"],
           "additionalProperties": false
