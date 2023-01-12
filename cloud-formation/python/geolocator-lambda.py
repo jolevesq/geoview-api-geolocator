@@ -2,7 +2,6 @@ import json
 import urllib.request
 from params_manager import *
 from s3_manager import *
-import re
 
 IN_API = 'in-api'
 OUT_API = 'out-api'
@@ -11,10 +10,17 @@ def get_schema_from_bucket(bucket, file_path):
     body = read_file(bucket, file_path)
     return json.loads(body)
 
+def get_from_field(field, item):
+    value = None
+    if field is not None:
+        if field in item:
+            value = item.get(field)
+    return value
+
 def lambda_handler(event, context):
     # Initilize variables and S3 service
     loads = []
-    bucket = get_S3bucket()
+    bucket = get_s3_bucket()
 
     # Schemas
     schema_paths = get_schemas_paths(bucket)
@@ -28,7 +34,7 @@ def lambda_handler(event, context):
     # 0. Read and Validate the parameters
     #queryString = event.get("params").get("querystring")
     params_full_list = validate_query_string_with_schema(event,
-                                                        in_api_schema, 
+                                                        in_api_schema,
                                                         services_dict.keys()
     )
     #params_full_list = validate_query_string(queryString, list(services_dict))
@@ -42,9 +48,9 @@ def lambda_handler(event, context):
 
         # 1. Extract url and parameters from json
         url = model.get("url")
-        print("url before: {}".format(url))
+        print(f"url before: {url}")
         url_params = model.get("urlParams")
-        #1.1. Copy the parameters list 
+        #1.1. Copy the parameters list
         params_service_list = params_full_list.copy()
 
         # 2. Parameters to modify the url
@@ -68,9 +74,9 @@ def lambda_handler(event, context):
         if static_params:
             for param in static_params:
                 qry_params_list.append(param)
-        print("qry_params_list after static parameters: {}".format(qry_params_list))
+        print(f"qry_params_list after static parameters: {qry_params_list}")
 
-        # 5. Add qry parameters (steps 3, 4) to url    
+        # 5. Add qry parameters (steps 3, 4) to url
         if qry_params_list:
             url += "&".join(qry_params_list)
 
@@ -83,13 +89,16 @@ def lambda_handler(event, context):
         response = query_response.read()
         #load = { "service": service, "url": url, "Load" : json.loads(response)}
         service_load = json.loads(response)
-        #print(service_load)
         ### After this point is where the 'out' part of the model applies
-        ###
-        ###
-        ###
-
-        loads.append(loads)
+        output = []
+        lookup_out = model.get("lookup").get("out")
+        for item in service_load:
+            output_item = {}
+            for key in lookup_out:
+                field = lookup_out.get(key).get("field")
+                output_item.update({key: get_from_field(field, item)})
+            output.append(output_item)
+        loads.append(output)
 
     return {
         "response": loads

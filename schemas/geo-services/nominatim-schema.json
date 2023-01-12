@@ -31,12 +31,10 @@
               "field": "",
               "lookup": ""
           },
-          "tag": [
-              {
+          "tag": {
                   "field": "class",
                   "lookup": ""
-              }
-          ]
+          }
       }
   }
 }

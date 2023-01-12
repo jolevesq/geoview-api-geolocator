@@ -1,4 +1,3 @@
-
 def catch_too_many_values(param_value):
     print(param_value)
     if len(param_value.split(',')) > 1:
@@ -16,18 +15,16 @@ def catch_unknown_param(entered_params, valid_params):
         error_message = f"paramaters not required: {unknown_params}"
         raise Exception(error_message)
 
-def get_value(dict, key):
+def get_value(dic, key):
     value = None
-    if dict.get(key):
-        value = dict.get(key)
+    if dic.get(key):
+        value = dic.get(key)
     return value
 
 def validate_query_string_with_schema(event, schema, services):
-    print(schema)
-    params_list = {}
     url_parameters = event
     print(url_parameters)
-    type = schema["type"]
+    #type = schema["type"]
     properties = schema["properties"]
     required = schema["required"]
     for require in required:
@@ -36,7 +33,7 @@ def validate_query_string_with_schema(event, schema, services):
             raise Exception(error_message)
         params = properties[require]
         url_params = url_parameters["params"]
-    type = params["type"]
+    #type = params["type"]
     properties = params["properties"]
     required = params["required"]
     for require in required:
@@ -45,7 +42,7 @@ def validate_query_string_with_schema(event, schema, services):
             raise Exception(error_message)
         querystring = properties["querystring"]
         url_querystring = url_params["querystring"]
-    type = querystring["type"]
+    #type = querystring["type"]
     properties = querystring["properties"]
     required = querystring["required"]
     for require in required:
@@ -56,8 +53,8 @@ def validate_query_string_with_schema(event, schema, services):
     for key in properties:
         valid_parms.append(key)
         property_dict = properties[key]
-        prop_type = property_dict["type"]
-        prop_multItems = property_dict.get("multipleItems")
+        #prop_type = property_dict["type"]
+        #prop_multItems = property_dict.get("multipleItems")
 
         # Replace absent parameter and its value by default value.
         if not url_querystring.get(key):

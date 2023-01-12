@@ -1,11 +1,11 @@
 import boto3
 
-def get_S3bucket():
-    # This name is just temporary 
+def get_s3_bucket():
+    # This name is just temporary
     return "tutorial-bucket-test1"
 
-def get_substring(str, start, end):
-    return (str.split(start))[1].split(end)[0]
+def get_substring(string, start, end):
+    return (string.split(start))[1].split(end)[0]
 
 def get_objects(bucket_name):
     """
@@ -24,7 +24,7 @@ def get_objects(bucket_name):
 
     except ClientError as e:
         logging.error(e)
-        return False 
+        return False
 
 def get_schemas_paths(bucket_name):
     apis, services = {}, {}
@@ -40,7 +40,7 @@ def get_schemas_paths(bucket_name):
             if item.startswith(api_starts):
                 key = get_substring(item, api_starts, ends)
                 apis[key] = item
-            elif item.startswith('services'): 
+            elif item.startswith('services'):
                 key = get_substring(item, service_starts, ends)
                 services[key] = item
             else:
@@ -61,7 +61,7 @@ def read_file(bucket, filename):
     :return: body of the file as a string
     """
     try:
-        # Load file from S3 buckets 
+        # Load file from S3 buckets
         s3 = boto3.resource('s3')
         content_object = s3.Object(bucket, filename)
         file_body= content_object.get()['Body'].read().decode('utf-8')
@@ -70,5 +70,4 @@ def read_file(bucket, filename):
 
     except ClientError as e:
         logging.error(e)
-        return False 
-        
+        return False
