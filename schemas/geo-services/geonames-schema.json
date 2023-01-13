@@ -3,10 +3,10 @@
     "urlParams": {
         "param1": "lang"
     },
+  "staticParams": [],
     "lookup": {
         "in": {
-            "q": "q",
-            "lang": ""
+            "q": "q"
         },
         "out": {
             "name": {
