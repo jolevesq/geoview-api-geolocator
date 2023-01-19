@@ -86,12 +86,6 @@
       "items": { "$ref": "#/definitions/output" },
       "description": "The Geoname api result set."
     },
-    "google": {
-      "type": "array",
-      "uniqueItems": true,
-      "items": { "$ref": "#/definitions/output" },
-      "description": "The Google api result set."
-    },
     "nominatim": {
       "type": "array",
       "uniqueItems": true,
