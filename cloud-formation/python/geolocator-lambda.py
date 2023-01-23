@@ -27,10 +27,9 @@ def get_url_from_field(schema, data):
     return url.replace("_URL_", href)
 
 def get_from_url(schema, data):
-    #field = schema.get("lookup").get("field")
+    field = schema.get("lookup").get("field")
     url = get_url_from_field(schema, data)
-    return url
-    """
+    #return url
     query_response =urllib.request.urlopen(urllib.request.Request(
         url=url,
         method='GET'),
@@ -38,7 +37,6 @@ def get_from_url(schema, data):
     response = query_response.read()
     load = json.loads(response)
     return get_from_field(field, load)
-    """
 
 def replace_url_with_params(url, params, params_list):
     for param in params:
@@ -47,6 +45,32 @@ def replace_url_with_params(url, params, params_list):
         url = url.replace(param_match, replace_with)
     return url
 
+def validate_against_schema(value, definition):
+    type = definition.get("type")
+    if type == "string":
+        if not isinstance(value, str):
+            return "Invalide string value"
+    if type == "number":
+        try:
+            val = float(value)
+        except:
+            return "Invalide number value"
+        minimum = definition.get("minimum")
+        maximum = definition.get("maximum")
+        if (val < minimum) or (val > maximum): 
+            return "value number out of range"
+    if type == "array":
+        min_items = definition.get("minItems")
+        items = definition.get("items")
+        try:
+            m_items = int(min_items)
+        except:
+            return "Invalide counter value"
+        for i in range(m_items):
+            validate_against_schema(value[i], items[i])
+
+    return ""
+    
 def lambda_handler(event, context):
     # Initilize variables and S3 service
     loads = []
@@ -60,10 +84,11 @@ def lambda_handler(event, context):
     in_api_schema = get_schema_from_bucket(bucket, apis_dict[IN_API])
     # Metadata extracted from api-output-schema
     out_api_schema = get_schema_from_bucket(bucket, apis_dict[OUT_API])
-
+    output_schema = out_api_schema.get("definitions").get("output")
     # 0. Read and Validate the parameters
     params_full_list = validate_querystring_against_schema(event,in_api_schema)
     keys = params_full_list.pop("keys")
+
     #Initialize the load with the list of services
     for service in keys:
         # Get the model
@@ -105,7 +130,8 @@ def lambda_handler(event, context):
             timeout=5)
         response = query_response.read()
         service_load = json.loads(response)
-        ### After this point is where the 'out' part of the model applies
+
+        # At this point is where the 'out' part of each model applies
         output = []
         outer_field_layer = ""
         lookup_out = model.get("lookup").get("out")        #service model and layers structure
@@ -120,7 +146,8 @@ def lambda_handler(event, context):
         else:
             inner_field_layer = service_load
         for data_item in inner_field_layer:
-            output_item = {}
+            # Start each record with 'key:service' to match the out-api-schema
+            output_item = {"key": service}
             for key in lookup_out:
                 val = lookup_out.get(key)
                 if isinstance(val,dict):
@@ -140,17 +167,30 @@ def lambda_handler(event, context):
                             list_for_field.append(get_from_field(field, data_item))
                         else:
                             if lookup.get("type") == "url":
-                                field_url = get_url_from_field(item_schema, data_item)
+                                field_url = get_from_url(item_schema, data_item)
+                                # TODO: Tags list to string
                                 list_for_field.append(field_url)
                     output_item.update({key : list_for_field})
                 else:
                     print("Dont know!")
-
-        ### After this point is where the generic 'out-api-model applies
-
             output.append(output_item)
-        loads.append(output)
 
-    return {
-        "response": loads
-    }
+        # From this point is where the generic 'out-api schema applies
+        schema_items = output_schema.get("items").get("properties")
+        schema_required = output_schema.get("items").get("required")
+        for output_item in output:
+            for key in schema_items:
+                value = output_item.get(key)
+                if (value is None) and (key in schema_required):
+                    value = "Attribute required not found in item"
+                    output_item[key] = value
+                else:
+                    key_definition = schema_items.get(key)
+                    # TODO. Validate value against type, [min,max], items
+                    schema_error = validate_against_schema(value, key_definition)
+                    if schema_error:
+                        output_item[key] = f"{value} - {schema_error}"
+            # The item is added to the loads
+            loads.append(output_item)
+
+    return loads
