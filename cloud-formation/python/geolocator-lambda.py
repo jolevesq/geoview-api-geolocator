@@ -46,31 +46,39 @@ def replace_url_with_params(url, params, params_list):
     return url
 
 def validate_against_schema(value, definition):
-    type = definition.get("type")
-    if type == "string":
-        if not isinstance(value, str):
-            return "Invalide string value"
-    if type == "number":
-        try:
-            val = float(value)
-        except:
-            return "Invalide number value"
-        minimum = definition.get("minimum")
-        maximum = definition.get("maximum")
-        if (val < minimum) or (val > maximum): 
-            return "value number out of range"
-    if type == "array":
-        min_items = definition.get("minItems")
-        items = definition.get("items")
-        try:
-            m_items = int(min_items)
-        except:
-            return "Invalide counter value"
-        for i in range(m_items):
-            validate_against_schema(value[i], items[i])
+    if value is not None:
+        type = definition.get("type")
+        if type == "string":
+            if not isinstance(value, str):
+                return value, "Invalide string value"
+        elif type == "number":
+            try:
+                val = float(value)
+            except:
+                return value, "Invalide number value"
+            minimum = definition.get("minimum")
+            maximum = definition.get("maximum")
+            if (val < minimum) or (val > maximum): 
+                return val, "value number out of range"
+            return val, ""
+        elif type == "array":
+            min_items = definition.get("minItems")
+            items = definition.get("items")
+            try:
+                m_items = int(min_items)
+            except:
+                return min_items, "Invalide counter value"
+            for i in range(m_items):
+                val, error = validate_against_schema(value[i], items[i])
+                if error != "":
+                    value[i] = f"{value[i]} - {error}"
+                else:
+                    value[i] = val
+        else:
+            error = "data-type not recognized"
 
-    return ""
-    
+    return value, ""
+
 def lambda_handler(event, context):
     # Initilize variables and S3 service
     loads = []
@@ -181,15 +189,18 @@ def lambda_handler(event, context):
         for output_item in output:
             for key in schema_items:
                 value = output_item.get(key)
-                if (value is None) and (key in schema_required):
+                # Validate required parameters
+                if (key in schema_required) and (value is None):
                     value = "Attribute required not found in item"
                     output_item[key] = value
                 else:
+                    # Validate value against schema
                     key_definition = schema_items.get(key)
-                    # TODO. Validate value against type, [min,max], items
-                    schema_error = validate_against_schema(value, key_definition)
+                    val, schema_error = validate_against_schema(value, key_definition)
                     if schema_error:
                         output_item[key] = f"{value} - {schema_error}"
+                    else:
+                        output_item[key] = val
             # The item is added to the loads
             loads.append(output_item)
 
