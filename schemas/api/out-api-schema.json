@@ -69,7 +69,12 @@
             "description": "The province the item belongs to. Optional return value, may be derived from the name parameter."
           },
           "tag": {
-            "type": "string",
+            "type": "array",
+            "minItems": 0,
+            "items": {
+              "type": "string",
+              "description": "The content of the string depends of the source."
+            },
             "description": "The tag value of the item. Optional return value. tags may be different from one API to the other, it is a value to help understand what type of item it is."
           }
         },

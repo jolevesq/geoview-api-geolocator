@@ -8,17 +8,41 @@ IN_API = 'in-api'
 OUT_API = 'out-api'
 
 def get_schema_from_bucket(bucket, file_path):
+    """
+    Get the schema specified by the path from the AWS s3 bucket
+
+    Params:
+      bucket: The Id of the bucket
+      file_path: Full path of the object inside the bucket
+    Returns:
+      The schema on json format
+    """
     body = read_file(bucket, file_path)
     return json.loads(body)
 
 def get_from_field(field, item):
-    value = None
-    if field is not None:
-        if field in item:
-            value = item.get(field)
-    return value
+    """
+    Get the data value asociated with an specific field from a data item
+
+    Params:
+      field: The field name
+      item: the data record
+    Returns:
+        The field value from the record if the field exists in the data item.
+    """
+    if field is None or field not in item:
+        return None
+    return item.get(field)
 
 def get_url_from_field(schema, data):
+    """
+    Get the url asociated with an specific field based on the schema provided
+
+    Params:
+      schema: The schema with the embedded dictionaries to get access to the url
+      data: the data structure where the url can be found
+    Returns: the field value asociated with
+    """
     field = schema.get("field")
     url = schema.get("lookup").get("url")
     # Build the url
@@ -27,6 +51,14 @@ def get_url_from_field(schema, data):
     return url.replace("_URL_", href)
 
 def get_from_url(schema, data):
+    """
+    Task: Get the data value asociated with an specific field from a REST response
+
+    Params:
+      schema: The schema defintion to access to the url
+      data: the data structure where the url can be found
+    Returns: from a valid REST response, extracts the value from the asociated attribute.
+    """
     field = schema.get("lookup").get("field")
     url = get_url_from_field(schema, data)
     #return url
@@ -39,6 +71,16 @@ def get_from_url(schema, data):
     return get_from_field(field, load)
 
 def replace_url_with_params(url, params, params_list):
+    """
+    Task: replace and returns the parameters embedded in the url with a valid set of values
+
+    Params:
+      url: The url to be affected
+      params: The list of parameters to be replace in the url
+      params_list: The list of query parameters where to search for the replacent to params
+
+    Returns: The url whit the original parameters are replaced with the asociated values.
+    """
     for param in params:
         param_match = "_"+param.upper()+"_"
         replace_with = params_list.pop(params.get(param))
@@ -46,6 +88,16 @@ def replace_url_with_params(url, params, params_list):
     return url
 
 def validate_against_schema(value, definition):
+    """
+    Task: Validate a piece of data with its asociated section in the schema
+
+    Params:
+      value: The data value to be evaluated
+      params: The section of the schema with the definition of the field
+
+    Returns: The return value for the piece of data either original or altered
+             and an error string where None or empty means no error.
+    """
     if value is not None:
         type = definition.get("type")
         if type == "string":
@@ -68,18 +120,47 @@ def validate_against_schema(value, definition):
                 m_items = int(min_items)
             except:
                 return min_items, "Invalide counter value"
-            for i in range(m_items):
-                val, error = validate_against_schema(value[i], items[i])
-                if error != "":
-                    value[i] = f"{value[i]} - {error}"
-                else:
-                    value[i] = val
+            # Match each item in the data list against the list in schema
+            if isinstance(items, list):
+                for i in range(m_items):
+                    val, error = validate_against_schema(value[i], items[i])
+                    if error != "":
+                        value[i] = f"{value[i]} - {error}"
+                    else:
+                        value[i] = val
+            else:
+                # Match the data list against the type of list in
+                for i in range(len(value)):                
+                    val, error = validate_against_schema(value[i], items)
+                    if error != "":
+                        value[i] = f"{value[i]} - {error}"
+                    else:
+                        value[i] = val
+
         else:
             error = "data-type not recognized"
 
     return value, ""
 
 def lambda_handler(event, context):
+    """
+    Task: Main function. When called, performs specific actions in order to 
+          extract, adapt, and return REST data from several specific services.
+    Those actions are:
+    - Initialize. Defines variables and services, reads schemas and validates
+                  parameters
+    - Query assembling. Based on the schema for each required service,
+                        a valid url is assembled and A REST call is performed
+    - Service output. the response is adapted to the expected structure.
+    - Validation. The resulting data is validated against an output schema to
+                  conform with expectation before be handed to the front-end.
+    Params:
+      event: Contiens the query parameters
+      context: Not required for this function
+
+    Returns: Standarized, validated data from REST services related to geolocation
+            to be handed to the front-end.
+    """
     # Initilize variables and S3 service
     loads = []
     bucket = get_s3_bucket()
@@ -183,7 +264,7 @@ def lambda_handler(event, context):
                     print("Dont know!")
             output.append(output_item)
 
-        # From this point is where the generic 'out-api schema applies
+        # From this point is where the generic 'out-api-schema applies
         schema_items = output_schema.get("items").get("properties")
         schema_required = output_schema.get("items").get("required")
         for output_item in output:
