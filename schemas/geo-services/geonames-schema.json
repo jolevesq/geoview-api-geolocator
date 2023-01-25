@@ -26,11 +26,11 @@
                 "lookup": ""
             },
             "province": {
-                "field": "items[].province.code",
+                "field": "items[].province.links.self.href",
                 "lookup": {
                     "type": "url",
-                    "url": "https://geogratis.gc.ca/services/geoname/_PARAM1_/codes/province/__items[].province.code__.json",
-                    "field": "descriptions"
+                    "url": "_URL_.json",
+                    "field": "description"
                 }
             },
             "tag": [
@@ -39,10 +39,10 @@
                     "lookup": ""
                 },
                 {
-                    "field": "items[].generic.code",
+                    "field": "items[].generic.links.self.href",
                     "lookup": {
                         "type": "url",
-                        "url": "https://geogratis.gc.ca/services/geoname/_PARAM1_/codes/generic/__items[].generic.code__.json",
+                        "url": "_URL_.json",
                         "field": "term"
                     }
                 }

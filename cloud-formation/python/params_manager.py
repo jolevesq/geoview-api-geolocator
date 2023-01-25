@@ -1,85 +1,75 @@
-def catch_too_many_values(param_value):
-    print(param_value)
-    if len(param_value.split(',')) > 1:
-        error_message = f"Too many values for the parameter: {param_value}"
-        raise Exception(error_message)
+from model_manager import *
 
-def catch_unknown_value(entered_value, valid_values):
-    if entered_value not in valid_values:
-        error_message = f"paramater invalid: {entered_value}"
-        raise Exception(error_message)
+def validate_required_parameters_with_schema(schema, parameters):
+    """
+    Identifies the required parameters and returns child schema and params
 
-def catch_unknown_param(entered_params, valid_params):
-    unknown_params = ','.join(list(set(entered_params) - set(valid_params)))
-    if unknown_params:
-        error_message = f"paramaters not required: {unknown_params}"
-        raise Exception(error_message)
+    Params:
+      schema: The rules required to validate the parameters
+      parameters: The parameters to be validated
 
-def get_value(dic, key):
-    value = None
-    if dic.get(key):
-        value = dic.get(key)
-    return value
-
-def validate_querystring_against_schema(event, schema):
-    url_parameters = event
-    #type = schema["type"]
-    properties = schema["properties"]
-    required = schema["required"]
-    for require in required:
-        if not url_parameters.get(require):
+    Returns: The child parameters and child schema properties once the ones
+             at this level are validated against each other
+    """
+    schema_properties = schema["properties"]
+    schema_required = schema["required"]
+    for require in schema_required:
+        if not parameters.get(require):
             error_message = f"inexistent parameter '{require}'"
             raise Exception(error_message)
-        params = properties[require]
-        url_params = url_parameters["params"]
-    #type = params["type"]
-    properties = params["properties"]
-    required = params["required"]
-    for require in required:
-        if not url_params.get(require):
-            error_message = f"inexistent parameter '{require}'"
-            raise Exception(error_message)
-        querystring = properties["querystring"]
-        url_querystring = url_params["querystring"]
-    #type = querystring["type"]
-    properties = querystring["properties"]
-    required = querystring["required"]
-    for require in required:
-        if not url_querystring.get(require):
-            error_message = f"inexistent parameter '{require}'"
-            raise Exception(error_message)
-    valid_parms = []
+        schema_params = schema_properties[require]
+        url_params = parameters[require]
+    return url_params, schema_params
+
+def get_params_default(params, schema):
+    """
+    Find and add the absent parameters wiht their default values.
+
+    Params:
+      params: The original dictionary of parameters
+      schema: The rules and default values for each parameter
+
+    Returns: The parameters including those found absents with default values
+    """
+    for key in schema:
+        param_schema = schema[key]
+        if not params.get(key):
+            if param_schema.get("type") == "array":
+                items = param_schema.get("items")
+                params[key] = items.get("enum")
+            else:
+                if param_schema.get("default"):
+                    params[key] = param_schema.get("default")
+
+def validate_querystring_against_schema(parameters, schema):
+    """
+    Validate the parameters against the schema to get the complete set
+    required
+
+    Params:
+      parameters: The tree containg the parameters from the query
+      schema: The rules to extract and modify the parameters from the tree
+
+    Returns: The full list of normalized and valid parameters
+    """
+    url_params, new_schema = validate_required_parameters_with_schema(
+        schema, 
+        parameters
+    )
+    query_params, new_schema = validate_required_parameters_with_schema(
+        new_schema, 
+        url_params
+    )
+    properties = new_schema["properties"]
+    validate_required_parameters_with_schema(new_schema, query_params)
+    # Fill the absent parameters with defaults
+    get_params_default(query_params, properties)
+    # Loop though the properties in schema
     for key in properties:
-        valid_parms.append(key)
-        property_dict = properties[key]
-
-        # Replace absent parameter and its value by default value.
-        if not url_querystring.get(key):
-            if property_dict.get("type") == "array":
-                property_items = property_dict.get("items")
-                url_querystring[key] = property_items.get("enum")
-            else:
-                if property_dict.get("default"):
-                    url_querystring[key] = property_dict.get("default")
-        else:
-            # match the parameter against valid values from schema or services
-            if property_dict.get("type") == "array":
-                property_items = property_dict.get("items")
-                property_enum = property_items.get("enum")
-                if key == "keys":
-                    url_services_list = url_querystring[key].split(',')
-                    for url_service in url_services_list:
-                        if url_service not in property_enum:
-                            error_message = f"invalid value '{url_service}' in query"
-                            raise Exception(error_message)
-                    url_querystring[key] = url_services_list
-            else:
-                # Validate single parameter value against list
-                prop_enum = get_value(property_dict,"enum")
-                if prop_enum:
-                    url_querystring_value = url_querystring[key]
-                    if url_querystring_value not in prop_enum:
-                        error_message = f"invalid parameter '{url_querystring_value}"
-                        raise Exception(error_message)
-
-    return url_querystring
+        # match the parameter against valid values from schema or services
+        property_dict = properties.get(key)
+        parameter = query_params.get(key)
+        value, error =  validate_against_schema(parameter, property_dict)
+        if not error:
+            query_params[key] = value
+    return query_params
