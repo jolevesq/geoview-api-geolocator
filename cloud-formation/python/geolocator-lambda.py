@@ -129,6 +129,7 @@ def lambda_handler(event, context):
     output_schema = out_api_schema.get("definitions").get("output")
     # 0. Read and Validate the parameters
     params_full_list = validate_querystring_against_schema(event,in_api_schema)
+
     keys = params_full_list.pop("keys")
 
     #Initialize the load with the list of services
@@ -143,7 +144,6 @@ def lambda_handler(event, context):
         url_params = model.get("urlParams")
         #1.1. Copy the parameters list
         params_service_list = params_full_list.copy()
-
         # 2. Parameters to modify the url
         if url_params:
             url = replace_url_with_params(url, url_params, params_service_list)
