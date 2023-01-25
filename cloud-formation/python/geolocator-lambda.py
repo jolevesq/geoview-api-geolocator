@@ -3,6 +3,8 @@ import urllib.request
 import urllib.parse
 from params_manager import *
 from s3_manager import *
+from model_manager import *
+
 
 IN_API = 'in-api'
 OUT_API = 'out-api'
@@ -39,25 +41,29 @@ def get_url_from_field(schema, data):
     Get the url asociated with an specific field based on the schema provided
 
     Params:
-      schema: The schema with the embedded dictionaries to get access to the url
+      schema: The schema with the path to get access to the url
       data: the data structure where the url can be found
     Returns: the field value asociated with
     """
     field = schema.get("field")
     url = schema.get("lookup").get("url")
-    # Build the url
+    # Modify the url with the href at the bottom of the fields
     fields_list = field.split(".")
-    href = data.get(fields_list[0]).get(fields_list[1]).get(fields_list[2]).get(fields_list[3])
+    href = data.get(fields_list[0]). \
+                get(fields_list[1]). \
+                get(fields_list[2]). \
+                get(fields_list[3])
     return url.replace("_URL_", href)
 
 def get_from_url(schema, data):
     """
-    Task: Get the data value asociated with an specific field from a REST response
+    Get the data value asociated with an specific field from a REST response
 
     Params:
       schema: The schema defintion to access to the url
       data: the data structure where the url can be found
-    Returns: from a valid REST response, extracts the value from the asociated attribute.
+    Returns: from a valid REST response, extracts the value from the asociated
+             attribute.
     """
     field = schema.get("lookup").get("field")
     url = get_url_from_field(schema, data)
@@ -72,14 +78,16 @@ def get_from_url(schema, data):
 
 def replace_url_with_params(url, params, params_list):
     """
-    Task: replace and returns the parameters embedded in the url with a valid set of values
+    Replace and returns the parameters embedded in the url with a valid set
+    of values
 
     Params:
       url: The url to be affected
       params: The list of parameters to be replace in the url
-      params_list: The list of query parameters where to search for the replacent to params
-
-    Returns: The url whit the original parameters are replaced with the asociated values.
+      params_list: The list of query parameters where to search for the
+                   replacent to params
+    Returns: The url whit the original parameters are replaced with the
+             asociated values.
     """
     for param in params:
         param_match = "_"+param.upper()+"_"
@@ -87,79 +95,24 @@ def replace_url_with_params(url, params, params_list):
         url = url.replace(param_match, replace_with)
     return url
 
-def validate_against_schema(value, definition):
-    """
-    Task: Validate a piece of data with its asociated section in the schema
-
-    Params:
-      value: The data value to be evaluated
-      params: The section of the schema with the definition of the field
-
-    Returns: The return value for the piece of data either original or altered
-             and an error string where None or empty means no error.
-    """
-    if value is not None:
-        type = definition.get("type")
-        if type == "string":
-            if not isinstance(value, str):
-                return value, "Invalide string value"
-        elif type == "number":
-            try:
-                val = float(value)
-            except:
-                return value, "Invalide number value"
-            minimum = definition.get("minimum")
-            maximum = definition.get("maximum")
-            if (val < minimum) or (val > maximum): 
-                return val, "value number out of range"
-            return val, ""
-        elif type == "array":
-            min_items = definition.get("minItems")
-            items = definition.get("items")
-            try:
-                m_items = int(min_items)
-            except:
-                return min_items, "Invalide counter value"
-            # Match each item in the data list against the list in schema
-            if isinstance(items, list):
-                for i in range(m_items):
-                    val, error = validate_against_schema(value[i], items[i])
-                    if error != "":
-                        value[i] = f"{value[i]} - {error}"
-                    else:
-                        value[i] = val
-            else:
-                # Match the data list against the type of list in
-                for i in range(len(value)):                
-                    val, error = validate_against_schema(value[i], items)
-                    if error != "":
-                        value[i] = f"{value[i]} - {error}"
-                    else:
-                        value[i] = val
-
-        else:
-            error = "data-type not recognized"
-
-    return value, ""
-
 def lambda_handler(event, context):
     """
-    Task: Main function. When called, performs specific actions in order to 
+    Task: Main function. When called, performs specific actions in order to
           extract, adapt, and return REST data from several specific services.
     Those actions are:
     - Initialize. Defines variables and services, reads schemas and validates
                   parameters
-    - Query assembling. Based on the schema for each required service,
-                        a valid url is assembled and A REST call is performed
-    - Service output. the response is adapted to the expected structure.
+    - Query assembling. Based on the schema for each required service, a valid 
+                        url is assembled before calling the REST service
+    - Service output. the response is adapted to the expected structure
     - Validation. The resulting data is validated against an output schema to
-                  conform with expectation before be handed to the front-end.
+                  be 'metadata' conformed before be handed to the front-end
     Params:
       event: Contiens the query parameters
       context: Not required for this function
 
-    Returns: Standarized, validated data from REST services related to geolocation
-            to be handed to the front-end.
+    Returns: Standarized, validated data from REST services related to
+             geolocation to be handed to the front-end
     """
     # Initilize variables and S3 service
     loads = []
@@ -200,8 +153,9 @@ def lambda_handler(event, context):
         qry_params_list = []
         if lookup_in:
             for in_param in lookup_in:
-                qry_params_list.append(lookup_in.get(in_param) +"=" \
-                                       + params_service_list.pop(in_param))
+                qry_params_list.append(lookup_in.get(in_param) \
+                                       + "=" + \
+                                       params_service_list.pop(in_param))
 
         # 4. static parameters
         static_params = model.get("staticParams")
@@ -223,14 +177,15 @@ def lambda_handler(event, context):
         # At this point is where the 'out' part of each model applies
         output = []
         outer_field_layer = ""
-        lookup_out = model.get("lookup").get("out")        #service model and layers structure
+        lookup_out = model.get("lookup").get("out")
         field_name_pattern = lookup_out.get("name").get("field")
         if "[]." in field_name_pattern:
             outer_field_layer = field_name_pattern.split("[].")[0]
             inner_field_layer = service_load.get(outer_field_layer)
             str_to_remove = outer_field_layer + "[]."
             lookup_out_str = str(lookup_out)
-            clean_lookup_out_str = lookup_out_str.replace(str_to_remove, "").replace("'", '"')
+            clean_lookup_out_str = lookup_out_str.replace(str_to_remove, ""). \
+                                                  replace("'", '"')
             lookup_out = json.loads(clean_lookup_out_str)
         else:
             inner_field_layer = service_load
@@ -243,21 +198,26 @@ def lambda_handler(event, context):
                     field = val.get("field")
                     lookup = val.get("lookup")
                     if not lookup:
-                        output_item.update({key: get_from_field(field, data_item)})
+                        output_item.update(
+                            {key: get_from_field(field, data_item)}
+                        )
                     else:
                         if lookup.get("type") == "url":
-                            output_item.update({key: get_from_url(val, data_item)})
+                            output_item.update(
+                                {key: get_from_url(val, data_item)}
+                            )
                 elif isinstance(val,list):
                     list_for_field = []
                     for item_schema in val:
                         field = item_schema.get("field")
                         lookup = item_schema.get("lookup")
                         if not lookup:
-                            list_for_field.append(get_from_field(field, data_item))
+                            list_for_field.append(
+                                get_from_field(field, data_item)
+                            )
                         else:
                             if lookup.get("type") == "url":
                                 field_url = get_from_url(item_schema, data_item)
-                                # TODO: Tags list to string
                                 list_for_field.append(field_url)
                     output_item.update({key : list_for_field})
                 else:
@@ -277,7 +237,8 @@ def lambda_handler(event, context):
                 else:
                     # Validate value against schema
                     key_definition = schema_items.get(key)
-                    val, schema_error = validate_against_schema(value, key_definition)
+                    val, schema_error = validate_against_schema(value, \
+                                                                key_definition)
                     if schema_error:
                         output_item[key] = f"{value} - {schema_error}"
                     else:
