@@ -129,11 +129,6 @@ def lambda_handler(event, context):
     output_schema = out_api_schema.get("definitions").get("output")
     # 0. Read and Validate the parameters
     params_full_list = validate_querystring_against_schema(event,in_api_schema)
-<<<<<<< HEAD
-=======
-
-    keys = params_full_list.pop("keys")
->>>>>>> 1bc91a8f6fa46ea6653fb98cb36f4059ac61157b
 
     keys = params_full_list.pop("keys")
     #Initialize the load with the list of services

@@ -33,7 +33,6 @@ def get_schemas_paths(bucket_name):
     ends = '-schema.json'
 
     objects = get_objects(bucket_name)
-
     for item in objects:
         # identification des services
         if item.endswith(ends):

@@ -43,7 +43,7 @@ def validate_against_schema(value, definition):
                         value[i] = val
             else:
                 # Match the data list against the type of list in
-                for i in range(len(value)):                
+                for i in range(len(value)):
                     val, error = validate_against_schema(value[i], items)
                     if error != "":
                         value[i] = f"{value[i]} - {error}"
