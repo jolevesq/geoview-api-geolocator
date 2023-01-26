@@ -131,7 +131,6 @@ def lambda_handler(event, context):
     params_full_list = validate_querystring_against_schema(event,in_api_schema)
 
     keys = params_full_list.pop("keys")
-
     #Initialize the load with the list of services
     for service in keys:
         # Get the model

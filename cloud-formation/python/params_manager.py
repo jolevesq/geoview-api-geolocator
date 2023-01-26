@@ -53,18 +53,21 @@ def validate_param_with_schema(param, schema):
     """
     if schema.get("type") == "string":
         enum = schema.get("enum")
-        if enum and param not in enum:
-            error_message = f"invalid parameter value '{param}'"
-            raise Exception(error_message)
+        if enum:
+            if param not in enum:
+                error_message = f"invalid parameter value '{param}'"
+                raise Exception(error_message)
+        else:
+            param = param.replace(" ","+")
     else:
         if not isinstance(param, list):
             param = param.split(",")
         items = schema.get("items")
         enum = items.get("enum")
-        for item_param in param:
-            if item_param not in enum:
-                error_message = f"invalid parameter value '{item_param}'"
-                raise Exception(error_message)
+        invalid = [item_param for item_param in param if item_param not in enum]
+        if len(invalid) > 1:
+            error_message = f"invalid parameter value(s) '{invalid}'"
+            raise Exception(error_message)
 
     return param
 
@@ -80,15 +83,18 @@ def validate_querystring_against_schema(parameters, schema):
     Returns: The full list of normalized and valid parameters
     """
     url_params, new_schema = validate_required_parameters_with_schema(
-        schema, 
+        schema,
         parameters
     )
     query_params, new_schema = validate_required_parameters_with_schema(
-        new_schema, 
+        new_schema,
         url_params
     )
     properties = new_schema["properties"]
-    validate_required_parameters_with_schema(new_schema, query_params)
+    validate_required_parameters_with_schema(
+        new_schema,
+        query_params
+    )
     # Fill the absent parameters with defaults
     get_params_default(query_params, properties)
     # Loop though the properties in schema
