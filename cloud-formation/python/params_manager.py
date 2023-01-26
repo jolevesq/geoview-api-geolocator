@@ -41,36 +41,6 @@ def get_params_default(params, schema):
                 if param_schema.get("default"):
                     params[key] = param_schema.get("default")
 
-def validate_param_with_schema(param, schema):
-    """
-    Validate the parameters against the schema's valid values
-
-    Params:
-      param: parameter value or list to be evaluated
-      schema: The rules to validate the parameter
-
-    Returns: Raises error in case of invalid value
-    """
-    if schema.get("type") == "string":
-        enum = schema.get("enum")
-        if enum:
-            if param not in enum:
-                error_message = f"invalid parameter value '{param}'"
-                raise Exception(error_message)
-        else:
-            param = param.replace(" ","+")
-    else:
-        if not isinstance(param, list):
-            param = param.split(",")
-        items = schema.get("items")
-        enum = items.get("enum")
-        invalid = [item_param for item_param in param if item_param not in enum]
-        if len(invalid) > 1:
-            error_message = f"invalid parameter value(s) '{invalid}'"
-            raise Exception(error_message)
-
-    return param
-
 def validate_querystring_against_schema(parameters, schema):
     """
     Validate the parameters against the schema to get the complete set
