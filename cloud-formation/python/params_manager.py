@@ -1,5 +1,3 @@
-from model_manager import *
-
 def validate_required_parameters_with_schema(schema, parameters):
     """
     Identifies the required parameters and returns child schema and params
@@ -41,6 +39,36 @@ def get_params_default(params, schema):
                 if param_schema.get("default"):
                     params[key] = param_schema.get("default")
 
+def validate_param_with_schema(param, schema):
+    """
+    Validate the parameters against the schema's valid values
+
+    Params:
+      param: parameter value or list to be evaluated
+      schema: The rules to validate the parameter
+
+    Returns: Raises error in case of invalid value
+    """
+    if schema.get("type") == "string":
+        enum = schema.get("enum")
+        if enum:
+            if param not in enum:
+                error_message = f"invalid parameter value '{param}'"
+                raise Exception(error_message)
+        else:
+            param = param.replace(" ","+")
+    else:
+        if not isinstance(param, list):
+            param = param.split(",")
+        items = schema.get("items")
+        enum = items.get("enum")
+        invalid = [item_param for item_param in param if item_param not in enum]
+        if len(invalid) > 0:
+            error_message = f"invalid parameter value(s) '{invalid}'"
+            raise Exception(error_message)
+
+    return param
+
 def validate_querystring_against_schema(parameters, schema):
     """
     Validate the parameters against the schema to get the complete set
@@ -53,15 +81,18 @@ def validate_querystring_against_schema(parameters, schema):
     Returns: The full list of normalized and valid parameters
     """
     url_params, new_schema = validate_required_parameters_with_schema(
-        schema, 
+        schema,
         parameters
     )
     query_params, new_schema = validate_required_parameters_with_schema(
-        new_schema, 
+        new_schema,
         url_params
     )
     properties = new_schema["properties"]
-    validate_required_parameters_with_schema(new_schema, query_params)
+    validate_required_parameters_with_schema(
+        new_schema,
+        query_params
+    )
     # Fill the absent parameters with defaults
     get_params_default(query_params, properties)
     # Loop though the properties in schema
@@ -69,7 +100,6 @@ def validate_querystring_against_schema(parameters, schema):
         # match the parameter against valid values from schema or services
         property_dict = properties.get(key)
         parameter = query_params.get(key)
-        value, error =  validate_against_schema(parameter, property_dict)
-        if not error:
-            query_params[key] = value
+        query_params[key] = validate_param_with_schema(parameter, property_dict)
+        print(parameter)
     return query_params
