@@ -1,7 +1,12 @@
 import boto3
 
 def get_s3_bucket():
-    # This name is just temporary
+    """
+    Get the name of the bucket
+
+    Returns: The name of the bucket in S3
+           # This name is just for develpping and testing purposes
+    """
     return "tutorial-bucket-test1"
 
 def get_substring(string, start, end):
@@ -10,8 +15,10 @@ def get_substring(string, start, end):
 def get_objects(bucket_name):
     """
     Read and return the content in the Bucket
-    :param bucket_name
-    :return: List of objects in the bucket
+
+    Param:
+      bucket_name: The name of the bucket to read from
+    Returns: List of objects in the bucket
     """
     list_obj = []
     try:
@@ -27,6 +34,13 @@ def get_objects(bucket_name):
         return False
 
 def get_schemas_paths(bucket_name):
+    """
+    Get the path to access all the objects in the bucket
+
+    Param:
+      bucket_name: The name of the bucket to read from
+    Returns: The paths to the objects in the bucket
+    """
     apis, services = {}, {}
     api_starts = 'api/'
     service_starts = 'services/'
@@ -55,10 +69,13 @@ def get_schemas_paths(bucket_name):
 
 def read_file(bucket, filename):
     """
-    return the content of the object
-    :param bucket
-    :param service
-    :return: body of the file as a string
+    Read the content of the object in the bucket
+
+    Params:
+      bucket: The name of the bucket to read from
+      filename: the path to the object
+
+    Returns: The content of the object as string
     """
     try:
         # Load file from S3 buckets
