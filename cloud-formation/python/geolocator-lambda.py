@@ -3,7 +3,6 @@ import urllib.request
 import urllib.parse
 from geolocator import Geolocator
 from params_manager import *
-#from s3_manager import *
 from model_manager import *
 
 IN_API = 'in-api'
