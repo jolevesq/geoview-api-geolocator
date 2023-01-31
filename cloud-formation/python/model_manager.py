@@ -1,6 +1,6 @@
 def validate_against_schema(value, definition):
     """
-    Task: Validate a piece of data with its asociated section in the schema
+    Validate a piece of data with its asociated section in the schema
 
     Params:
       value: The data value to be evaluated

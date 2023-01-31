@@ -1,27 +1,13 @@
 import json
 import urllib.request
 import urllib.parse
-import logging
+from geolocator import Geolocator
 from params_manager import *
-from s3_manager import *
+#from s3_manager import *
 from model_manager import *
-
 
 IN_API = 'in-api'
 OUT_API = 'out-api'
-
-def get_schema_from_bucket(bucket, file_path):
-    """
-    Get the schema specified by the path from the AWS s3 bucket
-
-    Params:
-      bucket: The Id of the bucket
-      file_path: Full path of the object inside the bucket
-    Returns:
-      The schema on json format
-    """
-    body = read_file(bucket, file_path)
-    return json.loads(body)
 
 def get_from_field(field, item):
     """
@@ -98,7 +84,7 @@ def replace_url_with_params(url, params, params_list):
 
 def lambda_handler(event, context):
     """
-    Task: Main function. When called, performs specific actions in order to
+    Main function. When called, performs specific actions in order to
           extract, adapt, and return REST data from several specific services.
     Those actions are:
     - Initialize. Defines variables and services, reads schemas and validates
@@ -115,29 +101,24 @@ def lambda_handler(event, context):
     Returns: Standarized, validated data from REST services related to
              geolocation to be handed to the front-end
     """
-    # Initilize variables and S3 service
+    # Initilize variables and objects
     loads = []
-    bucket = get_s3_bucket()
+    geolocator = Geolocator()
 
-    # Schemas
-    schema_paths = get_schemas_paths(bucket)
-    apis_dict = schema_paths['apis']
-    services_dict = schema_paths['services']
-    # Metadata extracted from api-input-schema
-    in_api_schema = get_schema_from_bucket(bucket, apis_dict[IN_API])
-    # Metadata extracted from api-output-schema
-    out_api_schema = get_schema_from_bucket(bucket, apis_dict[OUT_API])
+    # Read schemas from Geolocator
+    schemas = geolocator.get_schemas()
+
+    # Extract IO schemas
+    in_api_schema = schemas.get(IN_API)
+    out_api_schema = schemas.get(OUT_API)
     output_schema = out_api_schema.get("definitions").get("output")
     # 0. Read and Validate the parameters
     params_full_list = validate_querystring_against_schema(event,in_api_schema)
-
     keys = params_full_list.pop("keys")
-    #Initialize the load with the list of services
+    print(f"keys: {keys}")
+    # services to call
     for service in keys:
-        # Get the model
-        filename = services_dict.get(service)
-        body = read_file(bucket, filename)
-        model = json.loads(body)
+        model = schemas.get(service)
 
         # 1. Extract url and parameters from json
         url = model.get("url")
@@ -167,6 +148,7 @@ def lambda_handler(event, context):
         if qry_params_list:
             url += "&".join(qry_params_list)
         # At this point the query must be complete
+        print(f"url: {url}")
         query_response =urllib.request.urlopen(urllib.request.Request(
             url=url,
             method='GET'),
