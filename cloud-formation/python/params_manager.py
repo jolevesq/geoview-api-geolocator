@@ -101,4 +101,5 @@ def validate_querystring_against_schema(parameters, schema):
         property_dict = properties.get(key)
         parameter = query_params.get(key)
         query_params[key] = validate_param_with_schema(parameter, property_dict)
+
     return query_params

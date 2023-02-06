@@ -1,12 +1,7 @@
 import json
 import s3_manager
-
-# Constants
-APIS = 'apis'
-SERVICES = 'services'
-IN_API = 'in-api'
-OUT_API = 'out-api'
-PROPERTIES = 'properties'
+import botocore
+from constants import *
 
 # Singleton Class
 class Geolocator(object):
@@ -33,31 +28,35 @@ class Geolocator(object):
         """
         if cls._instance is None:
             cls._instance = super(Geolocator, cls).__new__(cls)
-            cls.read_schemas(cls)
+            try:
+                cls.read_schemas(cls)
+            except botocore.exceptions.ClientError as error:
+                print(error)
         return cls._instance
 
     def read_schemas(self):
         """
         Read the schemas from S3 service
 
-        Returns: the schemas once they were read
+        Returns: the schemas once they are read from the bucket
         """
         bucket = s3_manager.get_s3_bucket()
         #schemas
         _paths = s3_manager.get_schemas_paths(bucket)
         _apis_dict = _paths.get(APIS)
         _services_dict = _paths.get(SERVICES)
-        self._schemas[IN_API] = json.loads(
-            s3_manager.read_file(bucket,_apis_dict[IN_API])
-        )
-        self._schemas[OUT_API] = json.loads(
-            s3_manager.read_file(bucket,_apis_dict[OUT_API])
-        )
+        # IN schema
+        _in_api_schema = s3_manager.read_file(bucket,_apis_dict[IN_API])
+        self._schemas[IN_API] = json.loads(_in_api_schema)
+        #OUT schema
+        _out_api_schema = s3_manager.read_file(bucket,_apis_dict[OUT_API])
+        self._schemas[OUT_API] = json.loads(_out_api_schema)
+        # schemas of all services provided
         _out_api_properties = self._schemas.get(OUT_API).get(PROPERTIES)
         for key in _out_api_properties:
-            self._schemas[key] = json.loads(
-                s3_manager.read_file(bucket,_services_dict[key])
-            )
+            service = _services_dict.get(key)
+            service_schema = s3_manager.read_file(bucket,_services_dict[key])
+            self._schemas[key] = json.loads(service_schema)
 
     def get_schemas(self):
         """
