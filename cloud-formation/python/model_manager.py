@@ -1,9 +1,6 @@
 import json
 from url_methods import *
 
-"""
-============================== INPUT MODEL SECTION =============================
-"""
 def validate_against_schema(value, definition):
     """
     Validate a piece of data with its asociated section in the schema
@@ -60,9 +57,6 @@ def validate_against_schema(value, definition):
 
     return value, ""
 
-"""
-============================ OUTPUT MODELS SECTION =============================
-"""
 def get_lower_layer(model, data):
     """
     Go down through the layers of data to reach the data level
@@ -132,7 +126,7 @@ def adapt_to_model(service, model, item):
             output_item.update({key : list_for_field})
         else:
             print("Dont know!")
-            
+
     return output_item
 
 def apply_out_api(schema_items, schema_required, item):

@@ -48,7 +48,6 @@ def get_from_url(schema, data):
     url = get_url_from_field(schema, data)
     load = url_request(url)
     return get_from_field(field, load)
-    #return "x"
 
 def replace_url_with_params(url, params, params_list):
     """
@@ -74,9 +73,9 @@ def assemble_url(model, params):
     Builds the url by matching the parameters against the model
 
     Params:
-      model: the model with the rules to assemble the url and parameters
+      model: The model with the rules to assemble the url and parameters
       params: The list of parameters to be used to build the url
-      
+
     Returns: The assembled url including parameters as is required by the
              service model.
     """
@@ -110,6 +109,14 @@ def assemble_url(model, params):
     return url
 
 def url_request(url):
+    """
+    Calls a REST service passing the url
+
+    Params:
+      url: The url for the REST call
+
+    Returns: The response from the call.
+    """
     query_response =urllib.request.urlopen(urllib.request.Request(
         url=url,
         method='GET'),

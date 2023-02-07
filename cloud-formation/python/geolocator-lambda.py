@@ -7,7 +7,7 @@ def lambda_handler(event, context):
     """
     Main function. When called, performs specific actions in order to
           extract, adapt, and return REST data from several specific services.
-    
+
     Those actions are:
     - Initialize. Defines variables and services, reads schemas and validates
                  parameters
@@ -16,7 +16,7 @@ def lambda_handler(event, context):
     - Service output. the response is adapted to the expected structure
     - Validation. The resulting data is validated against an output schema to
                   be 'conformed' before be handed to the front-end
-    
+
     Params:
       event: Contiens the query parameters
       context: Not required for this function
