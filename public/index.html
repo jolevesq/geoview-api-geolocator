@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title><%= htmlWebpackPlugin.options.title %></title>
+    <title>Canadian Geospatial Platform GEOLOCATOR</title>
     <link rel="shortcut icon" href="./favicon.ico" />
 
     <link
@@ -15,6 +15,24 @@
     <script src="https://canadian-geospatial-platform.github.io/geoview/cgpv-main.js"></script> 
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <form action="https://fr59c5usw4.execute-api.ca-central-1.amazonaws.com/dev" method="GET">
+        <div>
+          <label for="q">Enter the filter information</label>
+          <input name="q" id="q" placeholder="meech" />
+        </div>
+        <div>
+          <label for="lang">Enter a valid lang (en/fr) for your search. none for default</label>
+          <input name="lang" id="lang" placeholder="en" />
+        </div>
+        <div>
+          <label for="keys">Select the sources for your search separatied by comma. None for all</label>
+          <input name="keys" id="keys" placeholder="nominatim,geonames" />
+        </div>
+        <div>
+          <button type="submit">Submit</button>
+        </div>
+      </form>
+    </div>
   </body>
 </html>

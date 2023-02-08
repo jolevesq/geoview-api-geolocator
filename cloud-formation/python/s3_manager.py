@@ -1,13 +1,14 @@
 import boto3
+from constants import *
 
 def get_s3_bucket():
     """
     Get the name of the bucket
 
     Returns: The name of the bucket in S3
-           # This name is just for develpping and testing purposes
+           # This name is just for developping and testing purposes
     """
-    return "tutorial-bucket-test1"
+    return "dev-app-geolocator"
 
 def get_substring(string, start, end):
     return (string.split(start))[1].split(end)[0]
@@ -61,8 +62,8 @@ def get_schemas_paths(bucket_name):
                 raise Exception("unknown item in bucket: "+ item)
 
     paths = {
-        "apis": apis,
-        "services": services
+        APIS: apis,
+        SERVICES: services
     }
 
     return paths
@@ -77,14 +78,12 @@ def read_file(bucket, filename):
 
     Returns: The content of the object as string
     """
+    s3 = boto3.resource('s3')
     try:
-        # Load file from S3 buckets
-        s3 = boto3.resource('s3')
         content_object = s3.Object(bucket, filename)
-        file_body= content_object.get()['Body'].read().decode('utf-8')
+    except:
+        print(f"content_object read error extracting: {filename}")
 
-        return str(file_body)
+    file_body= content_object.get()['Body'].read().decode('utf-8')
 
-    except ClientError as e:
-        logging.error(e)
-        return False
+    return str(file_body)
