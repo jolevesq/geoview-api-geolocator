@@ -18,7 +18,6 @@ class Geolocator(object):
     # Attributes
     _instance = None
     _schemas = {}
-
     # Methods
     def __new__(cls):
         """

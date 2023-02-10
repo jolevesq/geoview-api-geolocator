@@ -94,3 +94,14 @@ __Table__
     ]
 }
 ```
+
+### Response time
+The response time for the query depends on several factors:
+  - The service required. Different services perform different based on the
+    complexity to adapt the load to the standard output format. 
+    Several services at once will ad up to the final delay. 
+  - The size of the load. More items required more time to process. 
+    The more specific the query, the faster the answer will arrive.
+  - A delay of 5 minutes without performing any requests, will increase the 
+    response time in about 3 seconds for the next one, due to
+    the life time of objects in memory.
