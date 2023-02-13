@@ -50,6 +50,7 @@ if %M%==1 goto NEW_TEST
 :GEONAMES
 call test_geonames %calls%
 if %M%==2 goto NEW_TEST
+REM The next GOTO is When it comes for a new service
 goto NEW_TEST
 :EOF
 set /p Y=Merge log files into one (y/n)? :

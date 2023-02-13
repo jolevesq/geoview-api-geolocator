@@ -10,16 +10,19 @@ SET NomApp=curl
 SET modifier=-X
 SET method=GET
 SET ampers=^&
-SET q=hilliardton+swamp
+SET q=meech
 SET lang=en
-SET keys=geonames
+SET keys=nominatim
 SET filename=%keys%_log.log
 ECHO Service: %keys% >> %filename%
 REM ===========================================================================
 REM The number of calls is set. Never more than max
 REM ===========================================================================
 echo off
-SET /a max=%1
+SET /a max=1000
+SET /a param1=%max%
+SET /a param1=%1
+if %param1% LSS %max% (SET /a max=%param1%)
 ECHO Iterations: %max% >> %filename%
 
 SET status=0
@@ -36,7 +39,6 @@ echo %command%
 ECHO Start API time: %Time% >> %filename%
 @FOR /L %%G IN (1,1,%max%) DO (
 echo loop: %%G
-echo %q%
 @%command%
 )
 ECHO Stop API time: %Time% >> %filename%
@@ -46,8 +48,8 @@ ECHO completed %max% calls
 REM ===========================================================================
 REM ===================== Loop 2 to call the service url ======================
 REM ===========================================================================
-SET urlService=https://geogratis.gc.ca/services/geoname/%lang%/geonames.json?
-SET command=%curl_command% "%urlService%q=%q%%ampers%lang=%lang%"
+SET urlService=https://nominatim.openstreetmap.org/search?
+SET command=%curl_command% "%urlService%q=%q%%ampers%accept-language=%lang%%ampers%format=jsonv2"
 echo %command%
 ECHO Start %keys% service time: %Time% >> %filename%
 @FOR /L %%G IN (1,1,%max%) DO (
@@ -59,7 +61,6 @@ REM ================= Show the results at the end of the loop =================
 ECHO ===================== >> %filename%
 ECHO completed %max% calls >> %filename%
 ECHO. >> %filename%
-
 REM ===========================================================================
 REM We pause so that the window does not close 
 REM ===========================================================================
