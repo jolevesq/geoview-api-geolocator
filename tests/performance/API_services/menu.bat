@@ -29,14 +29,20 @@ echo 1 - Nominatim
 echo 2 - Geonames
 echo 3 - Nominatim and Geonames
 echo 9 - exit
-echo
+echo.
 REM ===========================================================================
 REM Define actions for each option
 REM ===========================================================================
-set /p M= Enter the digit of your selecton. then press 'return' :
-echo
+set /p M= Enter the digit of your selecton (9 to finish) :
 if %M%==9 goto EOF
 if %M% GEQ 4 goto NEW_TEST
+:QUERY
+echo.
+SET q=""
+set /p q= Enter the query text :
+if %q%=="" goto QUERY
+echo.
+SET calls=1
 set /p calls= Enter the number of calls to be performed (max=1000). then press 'return' :
 if %max% LSS %calls% (SET /a calls=%max%)
 if %M%==1 goto NOMINATIM
@@ -45,10 +51,10 @@ if %M%==3 goto NOMINATIM
 echo.
 goto menu_services
 :NOMINATIM
-call test_nominatim %calls%
+call test_nominatim %q% %calls%
 if %M%==1 goto NEW_TEST
 :GEONAMES
-call test_geonames %calls%
+call test_geonames  %q% %calls%
 if %M%==2 goto NEW_TEST
 REM The next GOTO is When it comes for a new service
 goto NEW_TEST
