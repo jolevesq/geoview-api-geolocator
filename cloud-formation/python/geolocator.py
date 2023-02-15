@@ -58,13 +58,13 @@ class Schema:
     def get_from_table(self, field, item):
         """
         Identifies the table and record to get the value from
-        
+
         parameters:
             field: contains two string values separated by point '.'.
                 - the first one is the name of the table (ditionary)
                 - The seconde one is the name of the field in the schema to
                   look into in the table
-        
+
         return The value asociated to the code in this table
         """
         fields=field.split(".")
