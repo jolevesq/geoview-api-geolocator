@@ -5,36 +5,42 @@
 	"countrycodes=CA",
 	"format=jsonv2"
   ],
+  "urlCodeTables": {},
   "lookup": {
       "in": {
           "q": "q",
           "lang": "accept-language"
       },
       "out": {
-          "name": {
-              "field": "display_name",
-              "lookup": ""
-          },
-          "lat": {
-              "field":"lat",
-              "lookup": ""
-          },
-          "lng": {
-              "field": "lon",
-              "lookup": ""
-          },
-          "bbox": {
-              "field": "boundingbox",
-              "lookup": ""
-          },
-          "province": {
-              "field": "",
-              "lookup": ""
-          },
-          "tag": {
-                  "field": "class",
-                  "lookup": ""
-          }
-      }
+        "structure" : {
+            "Type": "list"
+            },
+        "data": {
+            "name": {
+                "field": "display_name",
+                "lookup": ""
+            },
+            "lat": {
+                "field":"lat",
+                "lookup": ""
+            },
+            "lng": {
+                "field": "lon",
+                "lookup": ""
+            },
+            "bbox": {
+                "field": "boundingbox",
+                "lookup": ""
+            },
+            "province": {
+                "field": "",
+                "lookup": ""
+            },
+            "tag": {
+                    "field": "class",
+                    "lookup": ""
+            }
+        }
+    }
   }
 }

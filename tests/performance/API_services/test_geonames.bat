@@ -21,7 +21,7 @@ REM The number of calls is set. Never more than max
 REM ===========================================================================
 echo off
 SET /a max=%2
-ECHO Iterations: %max% >> %filename%
+ECHO Iterations-%max% >> %filename%
 REM ===========================================================================
 REM Building the command expresion.
 REM ===========================================================================
@@ -32,12 +32,12 @@ REM ===========================================================================
 SET urlAPI=https://fr59c5usw4.execute-api.ca-central-1.amazonaws.com/dev?
 SET command=%curl_command% "%urlAPI%q=%q%%ampers%lang=%lang%%ampers%keys=%keys%"
 echo %command%
-ECHO Start API time: %Time% >> %filename%
+ECHO Start API time-%Time% >> %filename%
 @FOR /L %%G IN (1,1,%max%) DO (
 echo loop: %%G
 @%command%
 )
-ECHO Stop API time: %Time% >> %filename%
+ECHO Stop API time-%Time% >> %filename%
 REM ================= Show the results at the end of the loop =================
 ECHO completed %max% calls
 
@@ -47,12 +47,12 @@ REM ===========================================================================
 SET urlService=https://geogratis.gc.ca/services/geoname/%lang%/geonames.json?
 SET command=%curl_command% "%urlService%q=%q%%ampers%lang=%lang%"
 echo %command%
-ECHO Start %keys% service time: %Time% >> %filename%
+ECHO Start %keys% service time-%Time% >> %filename%
 @FOR /L %%G IN (1,1,%max%) DO (
 echo loop: %%G
 @%command%
 )
-ECHO Stop %keys% service time: %Time% >> %filename%
+ECHO Stop %keys% service time-%Time% >> %filename%
 REM ================= Show the results at the end of the loop =================
 ECHO ===================== >> %filename%
 ECHO completed %max% calls >> %filename%

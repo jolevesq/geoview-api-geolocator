@@ -14,14 +14,14 @@ SET q=%1
 SET lang=en
 SET keys=nominatim
 SET filename=%keys%_log.log
-ECHO Service: %keys% >> %filename%
+ECHO Service-%keys% >> %filename%
 ECHO Query: %q% >> %filename%
 REM ===========================================================================
 REM The number of calls is set. Never more than max
 REM ===========================================================================
 echo off
 SET /a max=%2
-ECHO Iterations: %max% >> %filename%
+ECHO Iterations-%max% >> %filename%
 REM ===========================================================================
 REM Building the command expresion.
 REM ===========================================================================
@@ -32,12 +32,12 @@ REM ===========================================================================
 SET urlAPI=https://fr59c5usw4.execute-api.ca-central-1.amazonaws.com/dev?
 SET command=%curl_command% "%urlAPI%q=%q%%ampers%lang=%lang%%ampers%keys=%keys%"
 rem echo %command%
-ECHO Start API time: %Time% >> %filename%
+ECHO Start API time-%Time% >> %filename%
 @FOR /L %%G IN (1,1,%max%) DO (
 echo loop: %%G
 @%command%
 )
-ECHO Stop API time: %Time% >> %filename%
+ECHO Stop API time-%Time% >> %filename%
 REM ================= Show the results at the end of the loop =================
 ECHO completed %max% calls
 
@@ -47,12 +47,12 @@ REM ===========================================================================
 SET urlService=https://nominatim.openstreetmap.org/search?
 SET command=%curl_command% "%urlService%q=%q%%ampers%accept-language=%lang%%ampers%format=jsonv2"
 echo %command%
-ECHO Start %keys% service time: %Time% >> %filename%
+ECHO Start %keys% service time-%Time% >> %filename%
 @FOR /L %%G IN (1,1,%max%) DO (
 echo loop: %%G
 @%command%
 )
-ECHO Stop %keys% service time: %Time% >> %filename%
+ECHO Stop %keys% service time-%Time% >> %filename%
 REM ================= Show the results at the end of the loop =================
 ECHO ===================== >> %filename%
 ECHO completed %max% calls >> %filename%

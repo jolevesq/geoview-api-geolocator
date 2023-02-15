@@ -3,50 +3,74 @@
     "urlParams": {
         "param1": "lang"
     },
-  "staticParams": [],
+    "staticParams": [],
+    "urlCodeTables": {
+        "province" : {
+            "url": "https://geogratis.gc.ca/services/geoname/en/codes/province.json",
+            "type": "array",
+            "name": "definitions",
+            "fields": {
+                "code": "code",
+                "description": "description"
+            }
+        },
+        "generic": {
+            "url": "https://geogratis.gc.ca/services/geoname/en/codes/generic.json",
+            "type": "array",
+            "name": "definitions",
+            "fields": {
+                "code": "code",
+                "description": "term"
+            }
+        }
+    },
     "lookup": {
         "in": {
             "q": "q"
         },
         "out": {
-            "name": {
-                "field": "items[].name",
-                "lookup": ""
-            },
-            "lat": {
-                "field":"items[].latitude",
-                "lookup": ""
-            },
-            "lng": {
-                "field": "items[].longitude",
-                "lookup": ""
-            },
-            "bbox": {
-                "field": "items[].bbox",
-                "lookup": ""
-            },
-            "province": {
-                "field": "items[].province.links.self.href",
-                "lookup": {
-                    "type": "url",
-                    "url": "_URL_.json",
-                    "field": "description"
-                }
-            },
-            "tag": [
-                {
-                    "field": "items[].location",
+            "structure" : {
+                "type": "dict",
+                "key": "items"
+                },
+            "data": {
+                "name": {
+                    "field": "name",
                     "lookup": ""
                 },
-                {
-                    "field": "items[].generic.links.self.href",
+                "lat": {
+                    "field":"latitude",
+                    "lookup": ""
+                },
+                "lng": {
+                    "field": "longitude",
+                    "lookup": ""
+                },
+                "bbox": {
+                    "field": "bbox",
+                    "lookup": ""
+                },
+                "province": {
+                    "field": "province.code",
                     "lookup": {
-                        "type": "url",
-                        "url": "_URL_.json",
-                        "field": "term"
+                        "type": "table",
+                        "field": "description"
                     }
-                }
-            ]
+                },
+                "tag": [
+                    {
+                        "field": "location",
+                        "lookup": ""
+                    },
+                    {
+                        "field": "generic.code",
+                        "lookup": {
+                            "type": "table",
+                            "field": "term"
+                        }
+                    }
+                ]
+            }
         }
     }
 }

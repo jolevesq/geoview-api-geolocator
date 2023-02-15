@@ -1,39 +1,7 @@
 import json
 from url_methods import *
+from constants import *
 import lambda_multiprocessing
-
-def items_from_pool(service,
-                    model_field_layer,
-                    schema_items,
-                    schema_required,
-                    data_layer):
-    """
-    Based on the output schema and api-out schema, returns the formated
-    data using multiprocessing to accelerate the task
-
-    Params:
-      service: The name of the service to put it ahead of the item's data
-      model_field_layer: the segment of the output model wich rules the
-                         transformation of the data layer
-      schema_items: the section of the out-api schema to process the data layer
-      schema_required: The section of the out-api schema to validate the
-                       prescence of the required field in the data layer
-      data_layer: the section of the item where the data can be extracted from
-
-    Returns: A single instance containing all the
-    schemas, each readable through its own key
-    """
-    loads=[]
-    list_to_process = []
-    for data_item in data_layer:
-        # Apply the multiprocessing to each field inside each data item
-        item = adapt_to_model_with_MP(service, model_field_layer, data_item)
-        # Apply the 'generic' out-api-schema to the item
-        list_to_process.append((schema_items, schema_required, item))
-    n =len(list_to_process)
-    with lambda_multiprocessing.Pool(n) as p:
-        loads = p.map(apply_out_api_pool, list_to_process)
-    return loads
 
 def validate_against_schema(value, definition):
     """
@@ -50,16 +18,16 @@ def validate_against_schema(value, definition):
         data_type = definition.get("type")
         if data_type == "string":
             if not isinstance(value, str):
-                return value, "Invalide string value"
+                return value, ERR_INVALID_STRING
         elif data_type == "number":
             try:
                 val = float(value)
             except:
-                return value, "Invalide number value"
+                return value, ERR_INVALID_NUMBER
             minimum = definition.get("minimum")
             maximum = definition.get("maximum")
             if (val < minimum) or (val > maximum):
-                return val, "value number out of range"
+                return val, ERR_NUMBER_OUT_OF_RANGE
             return val, ""
         elif data_type == "array":
             if not isinstance(value,list):
@@ -87,35 +55,31 @@ def validate_against_schema(value, definition):
                     else:
                         value[i] = val
         else:
-            error = "data-type not recognized"
+            error = ERR_UNEXPECTED_TYPE
 
     return value, ""
 
-def get_lower_layer(model, data):
+def get_data_layer(schema, data):
     """
     Go down through the layers of data to reach the data level
     based on the schema on each service
 
     Params:
-      model: The model with the data structure needed
+      schema: The schema with the data structure needed
       data: The raw data read from the service
 
-    Returns: The layer of data where the required information can be
-              extracted correctly
+    Returns: The the section of the schema for the data transformation and
+             the layer of data where is the required information 
     """
-    upper_field_layer = ""
-    model_out_layer = model.get("lookup").get("out")
-    field_name_pattern = model_out_layer.get("name").get("field")
-    if "[]." in field_name_pattern:
-        upper_field_layer = field_name_pattern.split("[].")[0]
-        data_field_layer = data.get(upper_field_layer)
-        str_to_remove = upper_field_layer + "[]."
-        layer_str = str(model_out_layer)
-        clean_layer_str = layer_str.replace(str_to_remove, "").replace("'", '"')
-        model_out_layer = json.loads(clean_layer_str)
+    schema_out = schema.get("lookup").get("out")
+    structure = schema_out.get("structure")
+    if structure.get("type")=="dict":
+        key = structure.get("key")
+        data_fields_layer = data.get(key)
     else:
-        data_field_layer = data
-    return model_out_layer, data_field_layer
+        data_fields_layer = data
+    schema_fields_layer = schema_out.get("data")
+    return schema_fields_layer, data_fields_layer
 
 def apply_out_api_pool(item_tuple):
     """
@@ -135,7 +99,7 @@ def apply_out_api_pool(item_tuple):
         value = item.get(key)
         # Validate required parameters
         if (key in schema_required) and (value is None):
-            value = "Attribute required not found in item"
+            value = ERR_ATTRIBUTE_NOT_FOUND
             item[key] = value
         else:
             # Validate value against schema
@@ -148,23 +112,24 @@ def apply_out_api_pool(item_tuple):
                 item[key] = val
     return item
 
-def adapt_to_model_with_MP(service, model, item):
+def adapt_to_model(service, model, schema_layer, item):
     """
     Extract the required information from each item based on the service model
 
     Params:
       service: The name of the service to be added at the begging of each item
-      model: The service model
+      model_layer: The layer from the schema to apply as model for the item
       item: The item to be affected by the model
+      model: The model schema with tables to extract from
 
     Returns: A restructured new item matching the output requirements
     """
     list_to_process=[]
     output_item = {"key": service}
     # Start each record with 'key:service' to match the out-api-schema
-    for key in model:
-        val = model.get(key)
-        list_to_process.append((key, val, item))
+    for key in schema_layer:
+        val = schema_layer.get(key)
+        list_to_process.append((key, val, item, model))
 
     n =len(list_to_process)
     with lambda_multiprocessing.Pool(n) as p:
@@ -173,7 +138,36 @@ def adapt_to_model_with_MP(service, model, item):
         output_item.update(item)
     return output_item
 
-def apply_schema_by_field(fields_tuple):
+def items_from_service(service, model, schema_items, schema_required, load):
+    """
+    Based on the output schema and api-out schema, returns the formated
+    data using multiprocessing to accelerate the task
+
+    Params:
+      service: The name of the service to put it ahead of the item's data
+      model: The model schema with tables to extract from
+      schema_items: the section of the out-api schema to process the data layer
+      schema_required: The section of the out-api schema to validate the
+                       prescence of the required field in the data layer
+      load: the section of the item where the data can be extracted from
+
+    Returns: A single instance containing all the
+    schemas, each readable through its own key
+    """
+    list_to_process = []
+    schema = model.get_schema()
+    schema_layer, data_layer = get_data_layer(schema, load)
+    #multiproces for the first function
+    for data_item in data_layer:
+        item = adapt_to_model(service, model, schema_layer, data_item)
+        # Apply the 'generic' out-api-schema to the item
+        list_to_process.append((schema_items, schema_required, item))
+        n =len(list_to_process)
+    with lambda_multiprocessing.Pool(n) as p:
+        loads = p.map(apply_out_api_pool, list_to_process)
+    return loads
+
+def apply_schema_by_field(parameters_tuple):
     """
     Extract the required information from each item based on the service model
 
@@ -182,18 +176,20 @@ def apply_schema_by_field(fields_tuple):
         key: The key of the field in the model
         val: The schema of transformation for that field
         item: The data field to be obtained based on the schema
+        model: The model schema with tables to extract from
 
     Returns: A restructured new item matching the output requirements
     """
-
-    key, val, item = fields_tuple
+    key, val, item, model = parameters_tuple
     if isinstance(val,dict):
         field = val.get("field")
         lookup = val.get("lookup")
         if not lookup:
             return {key: get_from_field(field, item)}
+        elif lookup.get("type")=="table":
+            return {key: model.get_from_table(field ,item)}
         else:
-            if lookup.get("type") == "url":
+            if lookup.get("type")=="url":
                 return {key: get_from_url(val, item)}
     elif isinstance(val,list):
         list_for_field = []
@@ -201,13 +197,16 @@ def apply_schema_by_field(fields_tuple):
             field = item_schema.get("field")
             lookup = item_schema.get("lookup")
             if not lookup:
-                list_for_field.append(
-                    get_from_field(field, item)
-                )
+                list_for_field.append(get_from_field(field, item))
             else:
-                if lookup.get("type") == "url":
+                if lookup.get("type") == "table":
+                    field_model = model.get_from_table(field ,item)
+                    list_for_field.append(field_model)
+                elif lookup.get("type") == "url":
                     field_url = get_from_url(item_schema, item)
                     list_for_field.append(field_url)
+                else:
+                    print(ERR_UNEXPECTED_TYPE)
         return {key : list_for_field}
     else:
-        print("Dont know!")
+        print(ERR_UNEXPECTED_TYPE)

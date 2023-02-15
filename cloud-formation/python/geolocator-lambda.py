@@ -2,6 +2,7 @@ from geolocator import Geolocator
 from params_manager import *
 from model_manager import *
 from constants import *
+import time
 
 def lambda_handler(event, context):
     """
@@ -30,6 +31,7 @@ def lambda_handler(event, context):
     # Read schemas from Geolocator
     schemas = geolocator.get_schemas()
     # Extract IO schemas
+    time_ini = time.time()
     in_api_schema = schemas.get(IN_API)
     out_api_schema = schemas.get(OUT_API)
     output_schema = out_api_schema.get("definitions").get("output")
@@ -41,18 +43,20 @@ def lambda_handler(event, context):
     # services to call
     for service in keys:
         model = schemas.get(service)
-        # Adjust the parameters to the model
-        url = assemble_url(model, params_full_list.copy())
+        schema = model.get_schema()
+        # Adjust the parameters to the service's schema
+        url = assemble_url(schema, params_full_list.copy())
         # At this point the query must be complete
         service_load = url_request(url)
         # At this point is where the 'out' part of each model applies
-        # Get the data layer from load based on the model
-        model_field_layer, data_layer = get_lower_layer(model, service_load)
-        items = items_from_pool(service,
-                                model_field_layer,
-                                schema_items,
-                                schema_required,
-                                data_layer)
+        #model_field_layer, data_layer = get_data_layer(schema, service_load)
+        items = items_from_service(service,
+                                   model,
+                                   schema_items,
+                                   schema_required,
+                                   service_load)
         loads.extend(items)
+    time_lapse = time.time() - time_ini
+    loads.append(time_lapse)
 
     return loads
