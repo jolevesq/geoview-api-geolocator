@@ -32,7 +32,7 @@
                 "enum": ["geonames", "nominatim"]
               },
               "description": "The list of supported API key to query. Optional parameter, if missing, all supported key will be query."
-                }
+            }
           },
           "required": ["q"],
           "additionalProperties": false

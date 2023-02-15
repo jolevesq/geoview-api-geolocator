@@ -27,45 +27,57 @@ The structure of this file is
     "urlParams": {
         "param1": "lang" // Optional parameter to substitue in urls
     },
+    "staticParams": [
+	    "countrycodes=CA", // Fixed parameters required by the service that 
+	    "format=jsonv2"    // will be added to the url before execution
+    ],
     "lookup": {
         "in": { // Input lookup information
             "q": "the_service_value", // Query parameter value to use to call
             "lang": "en" // Language parameter value
         },
         "out": { // Output lookup information
-            "name": {
-                "field": "items[].name", // Return JSON item to look for
-                "lookup": "" // Lookup to apply if needed
-            },
-            "lat": {
-                "field":"items[].latitude",
-                "lookup": ""
-            },
-            "lng": {
-                "field": "items[].longitude",
-                "lookup": ""
-            },
-            "bbox": {
-                "field": "items[].bbox",
-                "lookup": ""
-            },
-            "province": {
-                "field": "items[].province.code",
-                "lookup": ""
-            },
-            "tag": [ // Can contains many field values separated by ;
-                     // For optional parameter like "tag", the field value
-                     // can be left empty if no items can be use.
-                {
-                    "field": "items[].location",
+            "type": "array", // the type of data structure retrieved from the service
+            "items": { // Set of attributes to be fullfiled by the input data with
+                       // specific rules each 
+                "name": {
+                    "field": "name", // Return JSON item to look for
+                    "lookup": "" // Lookup to apply if needed
+                },
+                "lat": {
+                    "field":"latitude",
                     "lookup": ""
                 },
-                {
-                    "field": "items[].generic.code",
+                "lng": {
+                    "field": "longitude",
                     "lookup": ""
+                },
+                "bbox": {
+                    "field": "bbox",
+                    "lookup": ""
+                },
+                "province": {
+                    "field": "province.code",
+                    "lookup": {
+                        "type": "table",
+                        "field": "description"
                     }
-                }
-            ]
+                "tag": [ // Can contains many field values separated by ;
+                        // For optional parameter like "tag", the field value
+                        // can be left empty if no items can be use.
+                    {
+                        "field": "location",
+                        "lookup": ""
+                    },
+                    {
+                        "field": "generic.code",
+                        "lookup": {
+                            "type": "table",
+                            "field": "term"
+                        }
+                    }
+                ]
+            }
         }
     }
 }
@@ -94,3 +106,19 @@ __Table__
     ]
 }
 ```
+
+### Response time
+The response time for the query depends on several factors:
+  - The service required. Different services perform different based on the
+    complexity to adapt the load to the standard output format. 
+    Several services at once will ad up to the final delay. 
+  - The size of the load. More items required more time to process. 
+    The more specific the query, the faster the answer will arrive.
+  - A delay of 5 minutes without performing any requests, will increase the 
+    response time in about 3 seconds for the next one, due to
+    the life time of objects in memory.
+
+  * An url to tests concurrencial calls can be used for performance validation.
+    https://3wdd7ausil.execute-api.ca-central-1.amazonaws.com/dev?iterations=1000
+    Besides the prymary parameters, it also supports the other parameters
+    for the geolocator API.
