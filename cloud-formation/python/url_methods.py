@@ -44,9 +44,6 @@ def get_from_url(schema, data):
     Returns: from a valid REST response, extracts the value from the asociated
              attribute.
     """
-    print("from url")
-    print(schema)
-    print(data)
     field = schema.get("lookup").get("field")
     url = get_url_from_field(schema, data)
     load = url_request(url)

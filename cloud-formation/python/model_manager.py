@@ -206,7 +206,7 @@ def apply_schema_by_field(parameters_tuple):
                     field_url = get_from_url(item_schema, item)
                     list_for_field.append(field_url)
                 else:
-                    print(ERR_UNEXPECTED_TYPE)
+                    print(ERR_UNEXPECTED_SCHEMA_TYPE)
         return {key : list_for_field}
     else:
-        print(ERR_UNEXPECTED_TYPE)
+        print(ERR_UNEXPECTED_SCHEMA_TYPE)
