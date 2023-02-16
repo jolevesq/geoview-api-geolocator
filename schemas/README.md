@@ -88,7 +88,7 @@ Lookup can have 2 signatures. One can use a url to retrieve the value, another c
 
 __URL__
 ```
- "field": "items[].province.code",
+ "field": "province.code",
 "lookup": {
     "type": "url",
     "url": "https://.../_PARAM1_/../__items[].province.code__...", // Url to call
@@ -97,7 +97,7 @@ __URL__
 ```
 __Table__
 ```
- "field": "items[].province.code",
+ "field": "province.code",
 "lookup": {
     "type": "table",
     "items": [
@@ -120,5 +120,6 @@ The response time for the query depends on several factors:
 
   * An url to tests concurrencial calls can be used for performance validation.
     https://3wdd7ausil.execute-api.ca-central-1.amazonaws.com/dev?iterations=1000
-    Besides the prymary parameters, it also supports the other parameters
+
+    Besides the primary parameter, it also supports the other parameters
     for the geolocator API.
