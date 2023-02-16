@@ -31,6 +31,7 @@ def lambda_handler(event, context):
     # Read schemas from Geolocator
     schemas = geolocator.get_schemas()
     # Extract IO schemas
+    #time_ini = time.time()
     in_api_schema = schemas.get(IN_API)
     out_api_schema = schemas.get(OUT_API)
     output_schema = out_api_schema.get("definitions").get("output")
@@ -48,12 +49,12 @@ def lambda_handler(event, context):
         # At this point the query must be complete
         service_load = url_request(url)
         # At this point is where the 'out' part of each model applies
-        #model_field_layer, data_layer = get_data_layer(schema, service_load)
         items = items_from_service(service,
                                    model,
                                    schema_items,
                                    schema_required,
                                    service_load)
         loads.extend(items)
-
+    #time_lapse = time.time() - time_ini
+    #loads.append(time_lapse)
     return loads

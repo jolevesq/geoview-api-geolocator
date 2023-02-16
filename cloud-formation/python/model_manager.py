@@ -18,7 +18,10 @@ def validate_against_schema(value, definition):
         data_type = definition.get("type")
         if data_type == "string":
             if not isinstance(value, str):
-                return value, ERR_INVALID_STRING
+                if not isinstance(value, int):
+                    return value, ERR_INVALID_STRING
+                else:
+                    value = str(value)
         elif data_type == "number":
             try:
                 val = float(value)
@@ -55,7 +58,7 @@ def validate_against_schema(value, definition):
                     else:
                         value[i] = val
         else:
-            error = ERR_UNEXPECTED_TYPE
+            error = ERR_UNEXPECTED_SCHEMA_TYPE
 
     return value, ""
 
@@ -219,6 +222,8 @@ def get_from_dictionary(schema, item, model):
     """
     field = schema.get("field")
     lookup = schema.get("lookup")
+    if field == "":
+        return NULL
     if not lookup:
         return  get_from_schema(field, item)
     else:

@@ -4,6 +4,7 @@ SERVICES = 'services'
 IN_API = 'in-api'
 OUT_API = 'out-api'
 PROPERTIES = 'properties'
+NULL = 'null'
 
 # Error Messages
 ERR_UNEXPECTED_SCHEMA_TYPE = "An unexpected type of schema for this field"
