@@ -118,9 +118,9 @@ def adapt_to_model(service, model, schema_layer, item):
 
     Params:
       service: The name of the service to be added at the begging of each item
-      model_layer: The layer from the schema to apply as model for the item
-      item: The item to be affected by the model
       model: The model schema with tables to extract from
+      schema_layer: The layer from the schema to apply as model for the item
+      item: The item to be affected by the model
 
     Returns: A restructured new item matching the output requirements
     """
@@ -128,12 +128,12 @@ def adapt_to_model(service, model, schema_layer, item):
     output_item = {"key": service}
     # Start each record with 'key:service' to match the out-api-schema
     for key in schema_layer:
-        val = schema_layer.get(key)
-        list_to_process.append((key, val, item, model))
+        schema = schema_layer.get(key)
+        list_to_process.append((key, schema, item, model))
 
-    n =len(list_to_process)
-    with lambda_multiprocessing.Pool(n) as p:
-        items = p.map(apply_schema_by_field, list_to_process)
+    num =len(list_to_process)
+    with lambda_multiprocessing.Pool(num) as process:
+        items = process.map(apply_schema_by_field, list_to_process)
     for item in items:
         output_item.update(item)
     return output_item
@@ -162,51 +162,96 @@ def items_from_service(service, model, schema_items, schema_required, load):
         item = adapt_to_model(service, model, schema_layer, data_item)
         # Apply the 'generic' out-api-schema to the item
         list_to_process.append((schema_items, schema_required, item))
-        n =len(list_to_process)
-    with lambda_multiprocessing.Pool(n) as p:
-        loads = p.map(apply_out_api_pool, list_to_process)
+    num =len(list_to_process)
+    with lambda_multiprocessing.Pool(num) as process:
+        loads = process.map(apply_out_api_pool, list_to_process)
     return loads
+
+def get_from_schema(schema, item):
+    """
+    Get the data value asociated with an specific field from a data item
+
+    Params:
+      schema: The schema or field name
+      item: the data record
+    Returns:
+        The field value from the record if the field exists in the data item.
+    """
+    if schema is None:
+        return None
+    fields=schema.split(".")
+    while len(fields) > 0:
+        field = fields.pop(0)
+        if field not in item:
+            return None
+        item = item.get(field)
+        if item == "":
+            return None
+    return item
+
+def get_from_array(schema, lookup, item):
+    """
+    Get the data value asociated with an specific field from an array of items
+
+    Params:
+      schema: The schema or field name
+      lookup: the section of schema that defines the rules to extract the value
+              from item
+      item: the data record
+    Returns:
+        The field value from the array
+    """
+    item_array = get_from_schema(schema, item)
+    ndx = int(lookup.get("field"))
+    return item_array[ndx]
+
+def get_from_dictionary(schema, item, model):
+    """
+    Based on the schema select and apply the method to use for the data
+    adquisition from the item
+
+    Params:
+      schema: The schema that defines the adquisition rules
+      item: the data record
+      model: The model schema with tables to extract from
+    Returns:
+        The field value from item
+    """
+    field = schema.get("field")
+    lookup = schema.get("lookup")
+    if not lookup:
+        return  get_from_schema(field, item)
+    else:
+        schema_type = lookup.get("type")
+        if schema_type == "table":
+            return  model.get_from_table(field ,item)
+        elif schema_type == "array":
+            return  get_from_array(field, lookup, item)
+        elif schema_type == "url":
+            return  get_from_url(schema, item)
+        else:
+            return  ERR_UNEXPECTED_SCHEMA_TYPE
 
 def apply_schema_by_field(parameters_tuple):
     """
     Extract the required information from each item based on the service model
 
     Params:
-      item_tuple: To be processed in parallel
+      parameters_tuple: To be processed in parallel
         key: The key of the field in the model
-        val: The schema of transformation for that field
+        schema: The schema of transformation for that field
         item: The data field to be obtained based on the schema
         model: The model schema with tables to extract from
 
     Returns: A restructured new item matching the output requirements
     """
-    key, val, item, model = parameters_tuple
-    if isinstance(val,dict):
-        field = val.get("field")
-        lookup = val.get("lookup")
-        if not lookup:
-            return {key: get_from_field(field, item)}
-        elif lookup.get("type")=="table":
-            return {key: model.get_from_table(field ,item)}
-        else:
-            if lookup.get("type")=="url":
-                return {key: get_from_url(val, item)}
-    elif isinstance(val,list):
+    key, schema, item, model = parameters_tuple
+    if isinstance(schema,dict):
+        return {key: get_from_dictionary(schema, item, model)}
+    elif isinstance(schema,list):
         list_for_field = []
-        for item_schema in val:
-            field = item_schema.get("field")
-            lookup = item_schema.get("lookup")
-            if not lookup:
-                list_for_field.append(get_from_field(field, item))
-            else:
-                if lookup.get("type") == "table":
-                    field_model = model.get_from_table(field ,item)
-                    list_for_field.append(field_model)
-                elif lookup.get("type") == "url":
-                    field_url = get_from_url(item_schema, item)
-                    list_for_field.append(field_url)
-                else:
-                    print(ERR_UNEXPECTED_SCHEMA_TYPE)
-        return {key : list_for_field}
+        for item_schema in schema:
+            list_for_field.append(get_from_dictionary(item_schema, item, model))
+        return {key: list_for_field}
     else:
-        print(ERR_UNEXPECTED_SCHEMA_TYPE)
+        return {key: ERR_UNEXPECTED_SCHEMA_TYPE}
