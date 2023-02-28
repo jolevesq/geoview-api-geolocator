@@ -441,7 +441,6 @@ if (true) {
 /***/ 251:
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
-var __webpack_unused_export__;
 /** @license React v17.0.2
  * react-jsx-runtime.production.min.js
  *
@@ -450,8 +449,8 @@ var __webpack_unused_export__;
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
-__webpack_require__(418);var f=__webpack_require__(294),g=60103;__webpack_unused_export__=60107;if("function"===typeof Symbol&&Symbol.for){var h=Symbol.for;g=h("react.element");__webpack_unused_export__=h("react.fragment")}var m=f.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.ReactCurrentOwner,n=Object.prototype.hasOwnProperty,p={key:!0,ref:!0,__self:!0,__source:!0};
-function q(c,a,k){var b,d={},e=null,l=null;void 0!==k&&(e=""+k);void 0!==a.key&&(e=""+a.key);void 0!==a.ref&&(l=a.ref);for(b in a)n.call(a,b)&&!p.hasOwnProperty(b)&&(d[b]=a[b]);if(c&&c.defaultProps)for(b in a=c.defaultProps,a)void 0===d[b]&&(d[b]=a[b]);return{$$typeof:g,type:c,key:e,ref:l,props:d,_owner:m.current}}exports.jsx=q;__webpack_unused_export__=q;
+__webpack_require__(418);var f=__webpack_require__(294),g=60103;exports.Fragment=60107;if("function"===typeof Symbol&&Symbol.for){var h=Symbol.for;g=h("react.element");exports.Fragment=h("react.fragment")}var m=f.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.ReactCurrentOwner,n=Object.prototype.hasOwnProperty,p={key:!0,ref:!0,__self:!0,__source:!0};
+function q(c,a,k){var b,d={},e=null,l=null;void 0!==k&&(e=""+k);void 0!==a.key&&(e=""+a.key);void 0!==a.ref&&(l=a.ref);for(b in a)n.call(a,b)&&!p.hasOwnProperty(b)&&(d[b]=a[b]);if(c&&c.defaultProps)for(b in a=c.defaultProps,a)void 0===d[b]&&(d[b]=a[b]);return{$$typeof:g,type:c,key:e,ref:l,props:d,_owner:m.current}}exports.jsx=q;exports.jsxs=q;
 
 
 /***/ }),
@@ -5009,6 +5008,53 @@ function makeStyles(stylesOrCreator, options = {}) {
   return useStyles;
 }
 ;// CONCATENATED MODULE: ./src/components/geolocator-content.tsx
+var __assign = (undefined && undefined.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (undefined && undefined.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
 
 var w = window;
 var cgpv = w['cgpv'];
@@ -5023,7 +5069,59 @@ var GeolocatorPanelContent = function (props) {
     var buttonPanel = props.buttonPanel, mapId = props.mapId;
     var ui = cgpv.ui, react = cgpv.react;
     var useState = react.useState, useEffect = react.useEffect, useMemo = react.useMemo;
-    return ((0,jsx_runtime.jsx)("div", { children: "This is the comming soon content!" }));
+    var _a = ui.elements, TextField = _a.TextField, Select = _a.Select, Autocomplete = _a.Autocomplete, Button = _a.Button;
+    var _b = useState(''), query = _b[0], setQuery = _b[1];
+    var _c = useState(['en']), language = _c[0], setLanguage = _c[1];
+    var _d = useState(''), services = _d[0], setServices = _d[1];
+    var languages = [
+        ['en', 'English'],
+        ['fr', 'French'],
+    ];
+    var serviceKeys = [
+        ['nominatim', 'nominatim'],
+        ['geonames', 'geonames'],
+    ];
+    function callGeolocator() {
+        console.log(query);
+        console.log(language);
+        console.log(services);
+        getConvertedData();
+    }
+    function getConvertedData() {
+        return __awaiter(this, void 0, void 0, function () {
+            var response, result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, fetch('https://fr59c5usw4.execute-api.ca-central-1.amazonaws.com/dev?q=meech')];
+                    case 1:
+                        response = _a.sent();
+                        return [4 /*yield*/, response.json()];
+                    case 2:
+                        result = _a.sent();
+                        console.log(result);
+                        return [2 /*return*/, result];
+                }
+            });
+        });
+    }
+    ;
+    function handleServices(event, newValue) {
+        setServices(newValue.map(function (x) { return x[1]; }).join(', '));
+    }
+    return ((0,jsx_runtime.jsxs)(jsx_runtime.Fragment, { children: [(0,jsx_runtime.jsx)("label", __assign({ htmlFor: "filter" }, { children: "Search filter" })), (0,jsx_runtime.jsx)(TextField, { id: "filter", type: "text", onChange: function (e) { return setQuery(e.target.value); } }), (0,jsx_runtime.jsxs)("div", __assign({ style: { display: "grid", padding: "10px" } }, { children: [(0,jsx_runtime.jsx)("label", __assign({ htmlFor: "language" }, { children: "Language filter (optional)" })), (0,jsx_runtime.jsx)(Select, { id: "language", value: language, onChange: function (e) { return setLanguage(e.target.value); }, inputLabel: {
+                            id: 'select-variable',
+                        }, menuItems: languages.map(function (_a) {
+                            var value = _a[0], label = _a[1];
+                            return ({
+                                key: value,
+                                item: {
+                                    value: value,
+                                    children: label,
+                                },
+                            });
+                        }) })] })), (0,jsx_runtime.jsx)(Autocomplete, { style: { display: "grid", paddingBottom: "20px" }, fullWidth: true, multiple: true, disableCloseOnSelect: true, disableClearable: false, id: "service-key", options: serviceKeys, getOptionLabel: function (option) { return "".concat(option[1], " (").concat(option[0], ")"); }, renderOption: function (props, option) { return (0,jsx_runtime.jsx)("span", __assign({}, props, { children: option[1] })); }, onChange: handleServices, 
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                renderInput: function (params) { return (0,jsx_runtime.jsx)(TextField, __assign({}, params, { label: "Select Service keys" })); } }), (0,jsx_runtime.jsx)(Button, __assign({ tooltip: "Process Data", tooltipPlacement: "right", type: "text", variant: "contained", onClick: function () { return callGeolocator(); } }, { children: "Process Data" }))] }));
 };
 
 ;// CONCATENATED MODULE: ./public/locales/en/translation.json
