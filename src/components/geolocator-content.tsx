@@ -29,7 +29,7 @@ export const GeolocatorPanelContent = (props: GeolocatorPanelContentProps): JSX.
   const { TextField, Select, Autocomplete, Button } = ui.elements;
 
   const [query, setQuery] = useState('');
-  const [language, setLanguage] = useState(['en']);
+  const [language, setLanguage] = useState('en');
   const [services, setServices] = useState('');
   const languages = [
     ['en', 'English'],
@@ -38,25 +38,37 @@ export const GeolocatorPanelContent = (props: GeolocatorPanelContentProps): JSX.
   const serviceKeys = [
     ['nominatim', 'nominatim'],
     ['geonames', 'geonames'],
+    ['locate', 'locate'],
+    ['nts', 'nts'],
   ];
 
   function callGeolocator() {
     console.log(query);
     console.log(language);
     console.log(services);
-
-    getConvertedData();
+    let qConst: string = "q=";
+    let langConst: string = "&lang=";
+    var servConst: string = "";
+    if (services.length > 0) {
+      servConst = "&keys=";
+    }
+    var queryString = qConst.concat(query, langConst, language, servConst, services)
+    console.log(queryString)
+    getConvertedData(queryString);
   }
 
-  async function getConvertedData(): Promise<any> {
-    const response = await fetch('https://fr59c5usw4.execute-api.ca-central-1.amazonaws.com/dev?q=meech');
+  async function getConvertedData(query: string): Promise<any> {
+    let url: string = 'https://fr59c5usw4.execute-api.ca-central-1.amazonaws.com/dev?'
+    var strToFetch = url.concat(query)
+    console.log(strToFetch)
+    const response = await fetch(strToFetch);
     const result: any = await response.json();
     console.log(result)
     return result;
   };
 
   function handleServices(event: Event, newValue: string[]) {
-    setServices(newValue.map((x) => x[1]).join(', '));
+    setServices(newValue.map((x) => x[1]).join(','));
   }
 
   return (

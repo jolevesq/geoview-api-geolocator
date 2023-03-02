@@ -1,5 +1,7 @@
 import json
+import requests
 import urllib.request
+import asyncio
 
 def get_from_field(field, item):
     """
@@ -46,7 +48,7 @@ def get_from_url(schema, data):
     """
     field = schema.get("lookup").get("field")
     url = get_url_from_field(schema, data)
-    load = url_request(url)
+    load = url_request(url, {})
     return get_from_field(field, load)
 
 def replace_url_with_params(url, params, params_list):
@@ -68,59 +70,49 @@ def replace_url_with_params(url, params, params_list):
         url = url.replace(param_match, replace_with)
     return url
 
-def assemble_url(model, params):
+def assemble_url(schema, params):
     """
-    Builds the url by matching the parameters against the model
+    Builds the url by matching the parameters against the schema
 
     Params:
-      model: The model with the rules to assemble the url and parameters
+      schema: The schema with the rules to assemble the url and parameters
       params: The list of parameters to be used to build the url
 
     Return: The assembled url including parameters as is required by the
-             service model.
+             service schema.
     """
     # 1. Extract url and parameters from json
-    url = model.get("url")
-    url_params = model.get("urlParams")
-    #1.1. Copy the parameters list
+    url = schema.get("url")[:-1]
+    url_params = schema.get("urlParams")
     # 2. Parameters to modify the url
     if url_params:
         url = replace_url_with_params(url, url_params, params)
-
     # 3. lookup in parameters to replace with
-    lookup_in = model.get("lookup").get("in")
+    qry_params_dict = params
+    lookup_in = schema.get("lookup").get("in")
     qry_params_list = []
     if lookup_in:
         for in_param in lookup_in:
-            qry_params_list.append(lookup_in.get(in_param) \
-                                   + "=" + \
-                                   params.pop(in_param))
-
+            qry_params_dict[lookup_in.get(in_param)] = params.pop(in_param)
     # 4. static parameters
-    static_params = model.get("staticParams")
+    static_params = schema.get("staticParams")
     if static_params:
-        for param in static_params:
-            qry_params_list.append(param)
+        qry_params_dict.update(static_params)
+    return url, qry_params_dict
 
-    # 5. Add qry parameters (steps 3, 4) to url
-    if qry_params_list:
-        url += "&".join(qry_params_list)
-
-    return url
-import time
-def url_request(url):
+def url_request(url, params):
     """
     Calls a REST service passing the url
 
     Params:
       url: The url for the REST call
+      params: The params to pass along with the url
 
     Return: The response from the call.
     """
-    query_response =urllib.request.urlopen(urllib.request.Request(
+    query_response = requests.get(
         url=url,
-        method='GET'),
+        params=params,
         timeout=5)
-    response = query_response.read()
-    json_response = json.loads(response)
+    json_response = query_response.json()
     return json_response

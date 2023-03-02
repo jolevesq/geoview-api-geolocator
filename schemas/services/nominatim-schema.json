@@ -1,10 +1,10 @@
 {
-  "url": "https://nominatim.openstreetmap.org/search?",
+  "url": "https://nominatim.openstreetmap.org/search",
   "urlParams": {},
-  "staticParams": [
-	"countrycodes=CA",
-	"format=jsonv2"
-  ],
+  "staticParams": {
+	"countrycodes": "CA",
+	"format": "jsonv2"
+  },
   "urlCodeTables": {},
   "lookup": {
       "in": {

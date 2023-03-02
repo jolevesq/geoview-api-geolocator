@@ -184,7 +184,7 @@ def validate_against_schema(value, definition):
                     else:
                         value[i] = val
         else:
-            error = ERR_UNEXPECTED_TYPE
+            error = ERR_UNEXPECTED_SCHEMA_TYPE
 
     return value, ""
 
@@ -256,8 +256,8 @@ async def apply_service_schema(service, model, functions_by_field, data_item):
         else:
             result_list = []
             for function_field in functions:
-                result_list.append(get_results(model, 
-                                   function_field, 
+                result_list.append(get_results(model,
+                                   function_field,
                                    data_item))
             item[key] = result_list
     return item
