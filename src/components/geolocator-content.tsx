@@ -48,13 +48,14 @@ export const GeolocatorPanelContent = (props: GeolocatorPanelContentProps): JSX.
     console.log(services);
     let qConst: string = "q=";
     let langConst: string = "&lang=";
-    var servConst: string = "";
+    let servConst: string = "";
     if (services.length > 0) {
       servConst = "&keys=";
     }
     var queryString = qConst.concat(query, langConst, language, servConst, services)
     console.log(queryString)
-    getConvertedData(queryString);
+    const returnedData = getConvertedData(queryString);
+    DisplayReturnedData(returnedData);
   }
 
   async function getConvertedData(query: string): Promise<any> {
@@ -64,11 +65,17 @@ export const GeolocatorPanelContent = (props: GeolocatorPanelContentProps): JSX.
     const response = await fetch(strToFetch);
     const result: any = await response.json();
     console.log(result)
-    return result;
+    return result
   };
 
   function handleServices(event: Event, newValue: string[]) {
     setServices(newValue.map((x) => x[1]).join(','));
+  };
+
+  function DisplayReturnedData(data: any) {
+    for (var index in data) {
+      console.log(data[index]);
+    }
   }
 
   return (
