@@ -35,6 +35,7 @@ interface GeolocatorDataContentProps {
  * @returns {JSX.Element} the new create data content
  */
 
+/*
 export function LayersList(props: TypeLayersListProps): JSX.Element {
   const { arrayOfLayerData, detailsSettings } = props;
   const [layerSetOpen, setLayerSetOpen] = useState<string>('');
@@ -86,3 +87,4 @@ export function LayersList(props: TypeLayersListProps): JSX.Element {
     </List>
   );
 }
+*/

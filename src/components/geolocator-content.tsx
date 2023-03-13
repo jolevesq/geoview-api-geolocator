@@ -66,9 +66,9 @@ export const GeolocatorPanelContent = (props: GeolocatorPanelContentProps): JSX.
     console.log(strToFetch)
     const response = await fetch(strToFetch);
     const result: any = await response.json();
-    result.map(val => {
-      console.log(val);
-    //console.log(result)
+    //result.map(val => {
+    //  console.log(val);
+    console.log(result)
     return result
   };
 
@@ -126,3 +126,4 @@ export const GeolocatorPanelContent = (props: GeolocatorPanelContentProps): JSX.
     </>
   );
 };
+
