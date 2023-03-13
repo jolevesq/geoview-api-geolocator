@@ -54,8 +54,10 @@ export const GeolocatorPanelContent = (props: GeolocatorPanelContentProps): JSX.
     }
     var queryString = qConst.concat(query, langConst, language, servConst, services)
     console.log(queryString)
-    const returnedData = getConvertedData(queryString);
-    DisplayReturnedData(returnedData);
+    var layerData = getConvertedData(queryString);
+    
+    //const returnedData = getConvertedData(queryString);
+    //DisplayReturnedData(returnedData);
   }
 
   async function getConvertedData(query: string): Promise<any> {
@@ -64,7 +66,9 @@ export const GeolocatorPanelContent = (props: GeolocatorPanelContentProps): JSX.
     console.log(strToFetch)
     const response = await fetch(strToFetch);
     const result: any = await response.json();
-    console.log(result)
+    result.map(val => {
+      console.log(val);
+    //console.log(result)
     return result
   };
 
@@ -72,11 +76,13 @@ export const GeolocatorPanelContent = (props: GeolocatorPanelContentProps): JSX.
     setServices(newValue.map((x) => x[1]).join(','));
   };
 
+  /*
   function DisplayReturnedData(data: any) {
     for (var index in data) {
       console.log(data[index]);
     }
   }
+*/
 
   return (
     <>
