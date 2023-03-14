@@ -4,7 +4,6 @@ import React, { useEffect } from 'react';
 import makeStyles from '@mui/styles/makeStyles';
 
 import { GeolocatorPanelContent } from './geolocator-content';
-//import { GeolocatorDataContent } from './geolocator-data-content';
 
 import translationEn from '../../public/locales/en/translation.json';
 import translationFr from '../../public/locales/fr/translation.json';
@@ -129,6 +128,7 @@ const App = (): JSX.Element => {
           }
         },
         'theme': 'dark',
+        'components': ['app-bar'],
         'suportedLanguages': ['en', 'fr']
         }"
     ></div>
