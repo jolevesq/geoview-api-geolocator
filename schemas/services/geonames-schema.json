@@ -1,9 +1,9 @@
 {
-    "url": "https://geogratis.gc.ca/services/geoname/_PARAM1_/geonames.json?",
+    "url": "https://geogratis.gc.ca/services/geoname/_PARAM1_/geonames.json",
     "urlParams": {
         "param1": "lang"
     },
-    "staticParams": [],
+    "staticParams": {},
     "urlCodeTables": {
         "province" : {
             "url": "https://geogratis.gc.ca/services/geoname/en/codes/province.json",

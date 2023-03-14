@@ -1,9 +1,9 @@
 {
-    "url": "https://geogratis.gc.ca/services/delimitation/_PARAM1_/nts?",
+    "url": "https://geogratis.gc.ca/services/delimitation/_PARAM1_/nts",
     "urlParams": {
         "param1": "lang"
     },
-    "staticParams": [],
+    "staticParams": {},
     "urlCodeTables": {},
     "lookup": {
         "in": {

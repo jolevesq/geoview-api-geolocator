@@ -1,6 +1,7 @@
 import json
 import s3_manager
 import botocore
+import urllib.request
 from constants import *
 from url_methods import url_request
 
@@ -41,7 +42,7 @@ class Schema:
             table_content={}
             schema_define_table = schema_url_tables.get(key)
             url_table = schema_define_table.get("url")
-            table_schema = url_request(url_table)
+            table_schema = url_request(url_table, {})
             if schema_define_table.get("type")=="array":
                 name_container=schema_define_table.get("name")
                 items = table_schema.get(name_container)
@@ -120,7 +121,7 @@ class Geolocator(object):
         # IN schema
         _in_api_schema = s3_manager.read_file(bucket,_apis_dict[IN_API])
         self._schemas[IN_API] = json.loads(_in_api_schema)
-        #OUT schema
+        # OUT schema
         _out_api_schema = s3_manager.read_file(bucket,_apis_dict[OUT_API])
         self._schemas[OUT_API] = json.loads(_out_api_schema)
         # schemas of all services provided

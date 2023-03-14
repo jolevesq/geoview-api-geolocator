@@ -1,11 +1,11 @@
 {
-    "url": "https://geogratis.gc.ca/services/geolocation/_PARAM1_/locate?",
+    "url": "https://geogratis.gc.ca/services/geolocation/_PARAM1_/locate",
     "urlParams": {
         "param1": "lang"
     },
-    "staticParams": [
-        "expand=component"
-    ],
+    "staticParams": {
+        "expand": "component"
+    },
     "urlCodeTables": {},
     "lookup": {
         "in": {

@@ -128,6 +128,7 @@ const App = (): JSX.Element => {
           }
         },
         'theme': 'dark',
+        'components': ['app-bar'],
         'suportedLanguages': ['en', 'fr']
         }"
     ></div>

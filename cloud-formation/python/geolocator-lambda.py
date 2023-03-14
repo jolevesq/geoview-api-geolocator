@@ -43,9 +43,9 @@ def lambda_handler(event, context):
         model = schemas.get(service_id)
         schema = model.get_schema()
         # Adjust the parameters to the service's schema
-        url = assemble_url(schema, params_full_list.copy())
+        url, params = assemble_url(schema, params_full_list.copy())
         # At this point the query must be complete
-        service_load= url_request(url)
+        service_load= url_request(url, params)
         # At this point is where the 'out' part of each model applies
         items = items_from_service(service_id,
                                    model,

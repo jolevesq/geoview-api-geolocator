@@ -62,7 +62,7 @@ def validate_param_with_schema(param, schema):
             param = param.split(",")
         items = schema.get("items")
         enum = items.get("enum")
-        invalid=[item_param for item_param in param if item_param not in enum]
+        invalid = [item_param for item_param in param if item_param not in enum]
         if len(invalid) > 0:
             error_message = f"invalid parameter value(s) '{invalid}'"
             raise Exception(error_message)

@@ -26,10 +26,11 @@ export const GeolocatorPanelContent = (props: GeolocatorPanelContentProps): JSX.
   const { ui, react } = cgpv;
 
   const { useState, useEffect, useMemo } = react;
-  const { TextField, Select, Autocomplete, Button } = ui.elements;
+  const { TextField, Select, Autocomplete, Button, List, ListItem, ListItemText } = ui.elements;
 
+  const [layerData, setLayerData] = useState([]);
   const [query, setQuery] = useState('');
-  const [language, setLanguage] = useState(['en']);
+  const [language, setLanguage] = useState('en');
   const [services, setServices] = useState('');
   const languages = [
     ['en', 'English'],
@@ -38,32 +39,48 @@ export const GeolocatorPanelContent = (props: GeolocatorPanelContentProps): JSX.
   const serviceKeys = [
     ['nominatim', 'nominatim'],
     ['geonames', 'geonames'],
+    ['locate', 'locate'],
+    ['nts', 'nts'],
   ];
 
   function callGeolocator() {
-    console.log(query);
-    console.log(language);
-    console.log(services);
-
-    getConvertedData();
+    const qConst: string = 'q=';
+    const langConst: string = '&lang=';
+    let servConst: string = '';
+    if (services.length > 0) {
+      servConst = '&keys=';
+    }
+    const queryString = qConst.concat(query, langConst, language, servConst, services);
+    getConvertedData(queryString).then((res) => {
+      setLayerData(res);
+    });
   }
 
-  async function getConvertedData(): Promise<any> {
-    const response = await fetch('https://fr59c5usw4.execute-api.ca-central-1.amazonaws.com/dev?q=meech');
+  async function getConvertedData(query: string): Promise<any> {
+    const url: string = 'https://fr59c5usw4.execute-api.ca-central-1.amazonaws.com/dev?';
+    const strToFetch = url.concat(query);
+    console.log(strToFetch);
+    const response = await fetch(strToFetch);
     const result: any = await response.json();
-    console.log(result)
+    console.log(result);
     return result;
-  };
+  }
 
   function handleServices(event: Event, newValue: string[]) {
-    setServices(newValue.map((x) => x[1]).join(', '));
+    setServices(newValue.map((x) => x[1]).join(','));
+  }
+
+  function zoomItem(coords: [number, number]) {
+    console.log(`lat ${coords[1]}, long ${coords[0]}`)
+    const coordsProj = cgpv.api.projection.latLngToWm([coords[0], coords[1]])[0];
+    cgpv.api.maps.mapWM.getView().animate({ center: coordsProj, duration: 500, zoom: 11 });
   }
 
   return (
     <>
       <label htmlFor="filter">Search filter</label>
       <TextField id="filter" type="text" onChange={(e: any) => setQuery(e.target.value)} />
-      <div style={{display: "grid", padding: "10px"}}>
+      <div style={{ display: 'grid', padding: '10px' }}>
         <label htmlFor="language">Language filter (optional)</label>
         <Select
           id="language"
@@ -82,7 +99,7 @@ export const GeolocatorPanelContent = (props: GeolocatorPanelContentProps): JSX.
         />
       </div>
       <Autocomplete
-        style={{display: "grid", paddingBottom: "20px"}}
+        style={{ display: 'grid', paddingBottom: '20px' }}
         fullWidth
         multiple={true}
         disableCloseOnSelect
@@ -98,6 +115,17 @@ export const GeolocatorPanelContent = (props: GeolocatorPanelContentProps): JSX.
       <Button tooltip="Process Data" tooltipPlacement="right" type="text" variant="contained" onClick={() => callGeolocator()}>
         Process Data
       </Button>
+      <List>
+        {layerData.map((layerData) => {
+          return (
+            <div key={layerData}>
+              <ListItem onClick={() => zoomItem([(layerData as any).lng, (layerData as any).lat])}>
+                <ListItemText primary={(layerData as any).name} nonce={undefined} />
+              </ListItem>
+            </div>
+          );
+        })}
+      </List>
     </>
   );
 };
