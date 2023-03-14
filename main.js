@@ -5069,10 +5069,11 @@ var GeolocatorPanelContent = function (props) {
     var buttonPanel = props.buttonPanel, mapId = props.mapId;
     var ui = cgpv.ui, react = cgpv.react;
     var useState = react.useState, useEffect = react.useEffect, useMemo = react.useMemo;
-    var _a = ui.elements, TextField = _a.TextField, Select = _a.Select, Autocomplete = _a.Autocomplete, Button = _a.Button;
-    var _b = useState(''), query = _b[0], setQuery = _b[1];
-    var _c = useState(['en']), language = _c[0], setLanguage = _c[1];
-    var _d = useState(''), services = _d[0], setServices = _d[1];
+    var _a = ui.elements, TextField = _a.TextField, Select = _a.Select, Autocomplete = _a.Autocomplete, Button = _a.Button, List = _a.List, ListItem = _a.ListItem, ListItemText = _a.ListItemText;
+    var _b = useState([]), layerData = _b[0], setLayerData = _b[1];
+    var _c = useState(''), query = _c[0], setQuery = _c[1];
+    var _d = useState('en'), language = _d[0], setLanguage = _d[1];
+    var _e = useState(''), services = _e[0], setServices = _e[1];
     var languages = [
         ['en', 'English'],
         ['fr', 'French'],
@@ -5080,19 +5081,31 @@ var GeolocatorPanelContent = function (props) {
     var serviceKeys = [
         ['nominatim', 'nominatim'],
         ['geonames', 'geonames'],
+        ['locate', 'locate'],
+        ['nts', 'nts'],
     ];
     function callGeolocator() {
-        console.log(query);
-        console.log(language);
-        console.log(services);
-        getConvertedData();
+        var qConst = 'q=';
+        var langConst = '&lang=';
+        var servConst = '';
+        if (services.length > 0) {
+            servConst = '&keys=';
+        }
+        var queryString = qConst.concat(query, langConst, language, servConst, services);
+        getConvertedData(queryString).then(function (res) {
+            setLayerData(res);
+        });
     }
-    function getConvertedData() {
+    function getConvertedData(query) {
         return __awaiter(this, void 0, void 0, function () {
-            var response, result;
+            var url, strToFetch, response, result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, fetch('https://fr59c5usw4.execute-api.ca-central-1.amazonaws.com/dev?q=meech')];
+                    case 0:
+                        url = 'https://fr59c5usw4.execute-api.ca-central-1.amazonaws.com/dev?';
+                        strToFetch = url.concat(query);
+                        console.log(strToFetch);
+                        return [4 /*yield*/, fetch(strToFetch)];
                     case 1:
                         response = _a.sent();
                         return [4 /*yield*/, response.json()];
@@ -5104,11 +5117,15 @@ var GeolocatorPanelContent = function (props) {
             });
         });
     }
-    ;
     function handleServices(event, newValue) {
-        setServices(newValue.map(function (x) { return x[1]; }).join(', '));
+        setServices(newValue.map(function (x) { return x[1]; }).join(','));
     }
-    return ((0,jsx_runtime.jsxs)(jsx_runtime.Fragment, { children: [(0,jsx_runtime.jsx)("label", __assign({ htmlFor: "filter" }, { children: "Search filter" })), (0,jsx_runtime.jsx)(TextField, { id: "filter", type: "text", onChange: function (e) { return setQuery(e.target.value); } }), (0,jsx_runtime.jsxs)("div", __assign({ style: { display: "grid", padding: "10px" } }, { children: [(0,jsx_runtime.jsx)("label", __assign({ htmlFor: "language" }, { children: "Language filter (optional)" })), (0,jsx_runtime.jsx)(Select, { id: "language", value: language, onChange: function (e) { return setLanguage(e.target.value); }, inputLabel: {
+    function zoomItem(coords) {
+        console.log("lat ".concat(coords[1], ", long ").concat(coords[0]));
+        var coordsProj = cgpv.api.projection.latLngToWm([coords[0], coords[1]])[0];
+        cgpv.api.maps.mapWM.getView().animate({ center: coordsProj, duration: 500, zoom: 11 });
+    }
+    return ((0,jsx_runtime.jsxs)(jsx_runtime.Fragment, { children: [(0,jsx_runtime.jsx)("label", __assign({ htmlFor: "filter" }, { children: "Search filter" })), (0,jsx_runtime.jsx)(TextField, { id: "filter", type: "text", onChange: function (e) { return setQuery(e.target.value); } }), (0,jsx_runtime.jsxs)("div", __assign({ style: { display: 'grid', padding: '10px' } }, { children: [(0,jsx_runtime.jsx)("label", __assign({ htmlFor: "language" }, { children: "Language filter (optional)" })), (0,jsx_runtime.jsx)(Select, { id: "language", value: language, onChange: function (e) { return setLanguage(e.target.value); }, inputLabel: {
                             id: 'select-variable',
                         }, menuItems: languages.map(function (_a) {
                             var value = _a[0], label = _a[1];
@@ -5119,9 +5136,11 @@ var GeolocatorPanelContent = function (props) {
                                     children: label,
                                 },
                             });
-                        }) })] })), (0,jsx_runtime.jsx)(Autocomplete, { style: { display: "grid", paddingBottom: "20px" }, fullWidth: true, multiple: true, disableCloseOnSelect: true, disableClearable: false, id: "service-key", options: serviceKeys, getOptionLabel: function (option) { return "".concat(option[1], " (").concat(option[0], ")"); }, renderOption: function (props, option) { return (0,jsx_runtime.jsx)("span", __assign({}, props, { children: option[1] })); }, onChange: handleServices, 
+                        }) })] })), (0,jsx_runtime.jsx)(Autocomplete, { style: { display: 'grid', paddingBottom: '20px' }, fullWidth: true, multiple: true, disableCloseOnSelect: true, disableClearable: false, id: "service-key", options: serviceKeys, getOptionLabel: function (option) { return "".concat(option[1], " (").concat(option[0], ")"); }, renderOption: function (props, option) { return (0,jsx_runtime.jsx)("span", __assign({}, props, { children: option[1] })); }, onChange: handleServices, 
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                renderInput: function (params) { return (0,jsx_runtime.jsx)(TextField, __assign({}, params, { label: "Select Service keys" })); } }), (0,jsx_runtime.jsx)(Button, __assign({ tooltip: "Process Data", tooltipPlacement: "right", type: "text", variant: "contained", onClick: function () { return callGeolocator(); } }, { children: "Process Data" }))] }));
+                renderInput: function (params) { return (0,jsx_runtime.jsx)(TextField, __assign({}, params, { label: "Select Service keys" })); } }), (0,jsx_runtime.jsx)(Button, __assign({ tooltip: "Process Data", tooltipPlacement: "right", type: "text", variant: "contained", onClick: function () { return callGeolocator(); } }, { children: "Process Data" })), (0,jsx_runtime.jsx)(List, { children: layerData.map(function (layerData) {
+                    return ((0,jsx_runtime.jsx)("div", { children: (0,jsx_runtime.jsx)(ListItem, __assign({ onClick: function () { return zoomItem([layerData.lng, layerData.lat]); } }, { children: (0,jsx_runtime.jsx)(ListItemText, { primary: layerData.name, nonce: undefined }) })) }, layerData));
+                }) })] }));
 };
 
 ;// CONCATENATED MODULE: ./public/locales/en/translation.json
@@ -5203,7 +5222,7 @@ var App = function () {
     return ((0,jsx_runtime.jsx)("div", { id: "mapWM", className: "llwp-map ".concat(classes.container), style: {
             height: '100vh',
             zIndex: 0,
-        }, "data-lang": "en", "data-config": "{\r\n        'map': {\r\n          'interaction': 'dynamic',\r\n          'viewSettings': {\r\n            'zoom': 4,\r\n            'center': [-100, 60],\r\n            'projection': 3857\r\n          },\r\n          'basemapOptions': {\r\n            'basemapId': 'transport',\r\n            'shaded': false,\r\n            'labeled': true\r\n          }\r\n        },\r\n        'theme': 'dark',\r\n        'suportedLanguages': ['en', 'fr']\r\n        }" }));
+        }, "data-lang": "en", "data-config": "{\r\n        'map': {\r\n          'interaction': 'dynamic',\r\n          'viewSettings': {\r\n            'zoom': 4,\r\n            'center': [-100, 60],\r\n            'projection': 3857\r\n          },\r\n          'basemapOptions': {\r\n            'basemapId': 'transport',\r\n            'shaded': false,\r\n            'labeled': true\r\n          }\r\n        },\r\n        'theme': 'dark',\r\n        'components': ['app-bar'],\r\n        'suportedLanguages': ['en', 'fr']\r\n        }" }));
 };
 /* harmony default export */ const app = (App);
 
