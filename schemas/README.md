@@ -7,18 +7,19 @@ The __input__ schema identifies the expected parameters to query the API.
     - "q": The query to parse and send to supported API's.
     - "lang": The language on wich to filter the query (fr or en).
     - "keys": The list of supported API key to query. Optional parameter, if missing, all
-supported key will be query.Every time we support a new API or services, a new key will be added to this array of accepted values.
+supported key will be queryied. Every time we support a new API or services, a new key will be added to this array of accepted values.
 
-The __output__ schemas identifies the parameters we will look for to parse the result.
-    - "name": The main return information.
+The __output__ schemas validates the obtained values match type and limits for each field.
+    - "key": The service Id for the source of the data
+    - "name": The generic name of the item.
     - "lat": The latitude value.
     - "lng": The longitude value.
     - "bbox": The bbox [minX, minY, maxX, maxY].
-    - "province": The province the item belongs to. Optional return value, may be derived from the name parameter or other lookup info.
+    - "province": The province the item belongs to. Optional return value.
     - "tag": The tag value of the item. Optional return value. tags may be different from one API to the other, it is a value to help understand what type of item it is.
 
 ### Supported API and services Metadata
-Each supported APIs and services may have differents input and output signatures. To help the parsing of these signatures, the Geolocator API will rely on JSON metadata file. This metadata file will also holds connection information like urls. The name of this file is the value of the key item (<key>-metadata.json).
+Each supported APIs and services may have differents input and output signatures. To help the parsing of these signatures, the Geolocator API will rely on JSON metadata file. This metadata file will also holds connection information like urls. The name of this file is the value of the key item (<key>-schema.json).
 
 The structure of this file is
 ```
@@ -27,14 +28,22 @@ The structure of this file is
     "urlParams": {
         "param1": "lang" // Optional parameter to substitue in urls
     },
-    "staticParams": [
+    "staticParams": {
 	    "countrycodes=CA", // Fixed parameters required by the service that 
 	    "format=jsonv2"    // will be added to the url before execution
-    ],
+    },
+    "urlCodeTables": {
+                        // Additional urls required to extract data tables for specific fields
+        "province" : {
+            "url": "https://geogratis.gc.ca/services/geoname/en/codes/province.json",
+            ...
+        }
+
+    }
     "lookup": {
-        "in": { // Input lookup information
-            "q": "the_service_value", // Query parameter value to use to call
-            "lang": "en" // Language parameter value
+        "in": { // Paramaters replacements specific for the current service
+            "q": "q",
+            "lang": "accept-language"
         },
         "out": { // Output lookup information
             "type": "array", // the type of data structure retrieved from the service
@@ -44,21 +53,16 @@ The structure of this file is
                     "field": "name", // Return JSON item to look for
                     "lookup": "" // Lookup to apply if needed
                 },
-                "lat": {
-                    "field":"latitude",
+                "lat": {  // field path to get access to the data value for this field
+                    "field":"geometry.location.lat",
                     "lookup": ""
-                },
-                "lng": {
-                    "field": "longitude",
-                    "lookup": ""
-                },
                 "bbox": {
                     "field": "bbox",
                     "lookup": ""
                 },
                 "province": {
                     "field": "province.code",
-                    "lookup": {
+                    "lookup": { // describes the structure and attributes to obtain the data value
                         "type": "table",
                         "field": "description"
                     }
@@ -84,28 +88,11 @@ The structure of this file is
 ```
 
 ### Lookup
-Lookup can have 2 signatures. One can use a url to retrieve the value, another can use a table.
-
-__URL__
-```
- "field": "province.code",
-"lookup": {
-    "type": "url",
-    "url": "https://.../_PARAM1_/../__items[].province.code__...", // Url to call
-    "field": "descriptions" // Field to read to get the value
-}
-```
-__Table__
-```
- "field": "province.code",
-"lookup": {
-    "type": "table",
-    "items": [
-        "code_value": "parsed_value", // e.i. "24": "Quebec"
-        ...
-    ]
-}
-```
+Lookup can have several signatures:
+    * None. The field is directly accesible.
+    * table. The data value must be extracted from a key-value table
+    * array. The data value comes from an specific position in an array of values
+    * url. The data value comes from and table obtained from a url (deprecated). 
 
 ### Response time
 The response time for the query depends on several factors:
@@ -113,13 +100,13 @@ The response time for the query depends on several factors:
     complexity to adapt the load to the standard output format. 
     Several services at once will ad up to the final delay. 
   - The size of the load. More items required more time to process. 
-    The more specific the query, the faster the answer will arrive.
+    The more specific the query, the faster the answer will arrive. (it was 
+    already improved by keeping a list of micro-schemas asociated to each field.
+    Even though the list must be cleared and rebuild for each service, the 
+    computing time is close to O(N) instead of O(N2)).
   - A delay of 5 minutes without performing any requests, will increase the 
     response time in about 3 seconds for the next one, due to
     the life time of objects in memory.
 
   * An url to tests concurrencial calls can be used for performance validation.
     https://3wdd7ausil.execute-api.ca-central-1.amazonaws.com/dev?iterations=1000
-
-    Besides the primary parameter, it also supports the other parameters
-    for the geolocator API.
