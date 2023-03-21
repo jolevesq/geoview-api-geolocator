@@ -1,22 +1,24 @@
 # Schemas and Metadata Structure
 
 ### Geolocator API Schemas
-The Geolocator API has schemas for [input](./api/in-api-schema,json) and [output](./api-out-schema.json).
+The Geolocator API has schemas for [input](./api/in-api-schema.json), [output](./api-out-schema.json) and several specific services schemas [./service/?-schema.json]
 
 The __input__ schema identifies the expected parameters to query the API.
     - "q": The query to parse and send to supported API's.
     - "lang": The language on wich to filter the query (fr or en).
     - "keys": The list of supported API key to query. Optional parameter, if missing, all
-supported key will be queryied. Every time we support a new API or services, a new key will be added to this array of accepted values.
+              supported key will be queryied. Every time we support a new API or services, a new key will be added to this array of accepted values.
 
 The __output__ schemas validates the obtained values match type and limits for each field.
     - "key": The service Id for the source of the data
-    - "name": The generic name of the item.
-    - "lat": The latitude value.
-    - "lng": The longitude value.
+    - "name": The generic name of the feature.
+    - "lat": The latitude coordinate.
+    - "lng": The longitude coordinate.
     - "bbox": The bbox [minX, minY, maxX, maxY].
     - "province": The province the item belongs to. Optional return value.
-    - "tag": The tag value of the item. Optional return value. tags may be different from one API to the other, it is a value to help understand what type of item it is.
+    - "tag": The tag value of the item. Optional return value. tags may be different from one API to
+             the other, it is a value to help understand what type of item it is.
+    It also includes a key ["properties"] with the list of valid 'services'.
 
 ### Supported API and services Metadata
 Each supported APIs and services may have differents input and output signatures. To help the parsing of these signatures, the Geolocator API will rely on JSON metadata file. This metadata file will also holds connection information like urls. The name of this file is the value of the key item (<key>-schema.json).
@@ -48,7 +50,7 @@ The structure of this file is
         "out": { // Output lookup information
             "type": "array", // the type of data structure retrieved from the service
             "items": { // Set of attributes to be fullfiled by the input data with
-                       // specific rules each 
+                       // specific rules each
                 "name": {
                     "field": "name", // Return JSON item to look for
                     "lookup": "" // Lookup to apply if needed
@@ -56,6 +58,7 @@ The structure of this file is
                 "lat": {  // field path to get access to the data value for this field
                     "field":"geometry.location.lat",
                     "lookup": ""
+				}
                 "bbox": {
                     "field": "bbox",
                     "lookup": ""
@@ -66,9 +69,10 @@ The structure of this file is
                         "type": "table",
                         "field": "description"
                     }
-                "tag": [ // Can contains many field values separated by ;
-                        // For optional parameter like "tag", the field value
-                        // can be left empty if no items can be use.
+				},
+                "tag": [ // Can contains many field values separated by comma ','.
+                         // For optional parameter like "tag", the field value
+                         // can be left empty if no value is found.
                     {
                         "field": "location",
                         "lookup": ""
@@ -85,7 +89,6 @@ The structure of this file is
         }
     }
 }
-```
 
 ### Lookup
 Lookup can have several signatures:
@@ -114,3 +117,4 @@ The response time for the query depends on several factors:
 
   * An url to tests concurrencial calls can be used for performance validation.
     https://3wdd7ausil.execute-api.ca-central-1.amazonaws.com/dev?iterations=1000
+

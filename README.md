@@ -2,8 +2,7 @@
 
 The Canadian Geospatial Platform (CGP) needs the ability to do Geocoding
 
->Geocoding is the process of converting addresses (like "1600 Amphitheatre Parkway, Mountain View, CA") into geographic coordinates (like latitude 37.423021 and longitude -122.083739), which you can use to place markers on a map, or position the map. Google Maps Geocoding API
-
+>Geocoding is the process of converting addresses (like "1600 Amphitheatre Parkway, Mountain View, CA") into geographic coordinates (like latitude 37.423021 and longitude -122.083739), which you can use to place markers on a map, or position the map. Google Maps Geocoding A
 There is many different APIs on the market to achieve this task. Each one of them has pros and cons and the use of only one API introduce limitations. The idea is the create a wrapper around many APIs and custom sources of geolocated features to be able to build a standard response for CGP tools to interact with.
 
 __Simple diagram__
@@ -11,7 +10,8 @@ __Simple diagram__
 
 [Demo](https://jolevesq.github.io/geoview-api-geolocator/index.html)
 
-Sample call to the API: https://ocni6zoj73.execute-api.ca-central-1.amazonaws.com/dev?q=meech&lang=en&keys=geonames
+Sample call to the API:
+https://fr59c5usw4.execute-api.ca-central-1.amazonaws.com/dev?q=meech&lang=en&keys=geonames
 
 ```html
 The demo with embeded viewer is being loaded in public/index.html as a script tag
