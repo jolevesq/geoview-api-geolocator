@@ -91,8 +91,12 @@ The structure of this file is
 Lookup can have several signatures:
     * None. The field is directly accesible.
     * table. The data value must be extracted from a key-value table
-    * array. The data value comes from an specific position in an array of values
-    * url. The data value comes from and table obtained from a url (deprecated). 
+    * array. The data value comes from an specific position in an array of
+             values.
+    * search. The data should be found by searching in a data field containing
+              a list of dictionaries where one matches an specific key-value.
+    * url. The data value comes from and table obtained from a url
+           (deprecated). 
 
 ### Response time
 The response time for the query depends on several factors:
