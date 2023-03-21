@@ -118,3 +118,102 @@ The response time for the query depends on several factors:
   * An url to tests concurrencial calls can be used for performance validation.
     https://3wdd7ausil.execute-api.ca-central-1.amazonaws.com/dev?iterations=1000
 
+
+### Google API's
+        """
+        To test Google services such as 'findplace' and 'geocode' without the key. 
+        Simulate the return from the service by bypassing the url_request with a 
+        condition and the expected returns.
+           "https://maps.googleapis.com/maps/api/geocode/json?address=confederation%20park&key=AIzaSyASQcYTDCw4fRr_GY5WHxIAqeTsDmvAh_8"
+
+        * Add the service in in-api-schema.json:
+                "enum": ["geonames", "nominatim", "locate", "nts"]
+        * Add the service in out-api-schema.json:
+            "properties": {
+                "geonames": {
+                "type": "array",
+                "uniqueItems": true,
+                "items": { "$ref": "#/definitions/output" },
+                "description": "The Geoname api result set."
+                },
+            }
+        * geolocator_lambda.py must be 'temporarily' modified in this way:        
+        """
+        if service_id != "geocode":
+            service_load = url_request(url, params)
+        else:
+            service_load = {
+               "results" : [
+                  {
+                     "address_components" : [
+                        {
+                           "long_name" : "Confederation Park",
+                           "short_name" : "Confederation Park",
+                           "types" : [ "establishment", "park", "point_of_interest", "tourist_attraction" ]
+                        },
+                        {
+                           "long_name" : "Elgin Street",
+                           "short_name" : "Elgin St",
+                           "types" : [ "route" ]
+                        },
+                        {
+                           "long_name" : "Downtown",
+                           "short_name" : "Downtown",
+                           "types" : [ "neighborhood", "political" ]
+                        },
+                        {
+                           "long_name" : "Ottawa",
+                           "short_name" : "Ottawa",
+                           "types" : [ "locality", "political" ]
+                        },
+                        {
+                           "long_name" : "Ottawa",
+                           "short_name" : "Ottawa",
+                           "types" : [ "administrative_area_level_2", "political" ]
+                        },
+                        {
+                           "long_name" : "Ontario",
+                           "short_name" : "ON",
+                           "types" : [ "administrative_area_level_1", "political" ]
+                        },
+                        {
+                           "long_name" : "Canada",
+                           "short_name" : "CA",
+                           "types" : [ "country", "political" ]
+                        },
+                        {
+                           "long_name" : "K1P 5J2",
+                           "short_name" : "K1P 5J2",
+                           "types" : [ "postal_code" ]
+                        }
+                     ],
+                     "formatted_address" : "Confederation Park, Elgin St, Ottawa, ON K1P 5J2, Canada",
+                     "geometry" : {
+                        "location" : {
+                           "lat" : 45.422394,
+                           "lng" : -75.692452
+                        },
+                        "location_type" : "GEOMETRIC_CENTER",
+                        "viewport" : {
+                           "northeast" : {
+                              "lat" : 45.4235181802915,
+                              "lng" : -75.69165646970849
+                           },
+                           "southwest" : {
+                              "lat" : 45.4208202197085,
+                              "lng" : -75.69435443029151
+                           }
+                        }
+                     },
+                     "partial_match" : true,
+                     "place_id" : "ChIJ55USI_mq0kwR0mbQ4LTQyU4",
+                     "plus_code" : {
+                        "compound_code" : "C8C5+X2 Somerset Ward, Ottawa, ON, Canada",
+                        "global_code" : "87Q6C8C5+X2"
+                     },
+                     "types" : [ "establishment", "park", "point_of_interest", "tourist_attraction" ]
+                  }
+               ],
+               "status" : "OK"
+            }
+        """
