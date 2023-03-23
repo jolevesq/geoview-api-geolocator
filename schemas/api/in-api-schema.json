@@ -11,7 +11,7 @@
       "description": "Query parameter coming from the API call url",
       "properties": {
         "querystring": {
-          "type": "object",
+          "type": "array",
           "description": "Dictionary containing the parameters and values passed with the url",
           "properties": {
             "q": {

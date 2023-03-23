@@ -28,10 +28,36 @@
                 "field": "lon",
                 "lookup": ""
             },
-            "bbox": {
-                "field": "boundingbox",
-                "lookup": ""
-            },
+            "bbox": [
+                {
+                    "field": "boundingbox",
+                    "lookup": {
+                        "type": "array",
+                        "field":"2"
+                    }
+                },
+                {
+                    "field": "boundingbox",
+                    "lookup": {
+                        "type": "array",
+                        "field":"0"
+                    }
+                },
+                {
+                    "field": "boundingbox",
+                    "lookup": {
+                        "type": "array",
+                        "field":"3"
+                    }
+                },
+                {
+                    "field": "boundingbox",
+                    "lookup": {
+                        "type": "array",
+                        "field":"1"
+                    }
+                }
+            ],
             "province": {
                 "field": "",
                 "lookup": ""
