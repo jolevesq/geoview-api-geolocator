@@ -1,6 +1,6 @@
 {
   "url" : "https://maps.googleapis.com/maps/api/place/findplacefromtext/json",
-  
+
   "urlParams" : {
   },
   "staticParams" : {
