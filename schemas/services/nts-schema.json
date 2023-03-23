@@ -20,10 +20,18 @@
                     "lookup": ""
                 },
                 "lat": {
-                    "field": ""
+                    "field": "bbox",
+                    "lookup": {
+                        "type": "average",
+                        "at" : [1, 3]
+                    }
                 },
                 "lng": {
-                    "field": ""
+                    "field": "bbox",
+                    "lookup": {
+                        "type": "average",
+                        "at" : [0, 2]
+                    }
                 },
                 "bbox": {
                     "field": "bbox",

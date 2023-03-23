@@ -57,6 +57,48 @@ def get_from_array(schema, lookup, item):
     ndx = int(lookup.get("field"))
     return item_array[ndx]
 
+def get_from_search(field, search_field, contains, return_field, item):
+    """
+    Get the data value asociated with an specific field from an array of items
+    where the item has the searched value 
+
+    Params:
+      field: The field where the list is placed in the data item
+      lookup:
+        - field_search. the field to search on
+        - search contains. The value to match the search with
+        - field. the field containg the returning value
+      item: the data record
+    Return:
+        The 'field' value from the sub-item containing the matching string in
+        the search field.
+    """
+    sub_items = get_from_schema(field, item)
+    for sub_item in sub_items:
+        if contains in get_from_schema(search_field, sub_item):
+            return sub_item.get(return_field)
+    return None
+
+def get_average(schema, index_list, item):
+    """
+    Get the average of a set of values from a numeric array
+
+    Params:
+      schema: The schema or field name
+      indexes: A list with positions of each value for the addition
+      item: the data record
+    Return:
+        The average of the specified values inside the list
+    """
+    addends = len(index_list)
+    if addends < 1:
+        return 0.0
+    total = 0.0
+    item_array = get_from_schema(schema, item)
+    for ndx in index_list:
+        total += item_array[ndx]
+    return total/addends
+
 def function_error():
     """
     Return:
@@ -89,16 +131,19 @@ def get_function_from_schema(schema, item):
         return function_null
     if not lookup:
         return get_from_schema
+    schema_type = lookup.get("type")
+    if schema_type == "table":
+        return get_from_model_table
+    elif schema_type == "array":
+        return get_from_array
+    elif schema_type == "search":
+        return get_from_search
+    elif schema_type == "average":
+        return get_average
+    elif schema_type == "url":
+        return get_from_url
     else:
-        schema_type = lookup.get("type")
-        if schema_type == "table":
-            return get_from_model_table
-        elif schema_type == "array":
-            return get_from_array
-        elif schema_type == "url":
-            return get_from_url
-        else:
-            return function_error
+        return function_error
 
 def get_results(model, function_field, item):
     """
@@ -122,6 +167,20 @@ def get_results(model, function_field, item):
         field = item_schema.get("field")
         lookup = item_schema.get("lookup")
         return function(field, lookup, item)
+    elif "get_from_search" in function.__name__:
+        field = item_schema.get("field")
+        search_field = item_schema.get("lookup").get("search_field")
+        contains = item_schema.get("lookup").get("contains")
+        return_field = item_schema.get("lookup").get("return_field")
+        return function(field,
+                        search_field,
+                        contains,
+                        return_field,
+                        item)
+    elif "get_average" in function.__name__:
+        field = item_schema.get("field")
+        ndx_list = item_schema.get("lookup").get("at")
+        return function(field, ndx_list, item)
     elif "function_null" in function.__name__:
         return function()
     else:
