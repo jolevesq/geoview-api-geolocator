@@ -337,7 +337,7 @@ def items_from_service(service, model, schema_items, schema_required, load):
       model: The model schema with tables to extract from
       schema_items: the section of the out-api schema to process the data layer
       schema_required: The section of the out-api schema to validate the
-                       prescence of 'required' fields in the data layer
+                       presence of 'required' fields in the data layer
       load: The input set of data items
 
     Return: A set of output items standarized and validated
