@@ -79,6 +79,12 @@
           }
         },
         "required": ["name", "lat", "lng"],
+        "alternate" : {
+          "required" : ["lat", "lng"],
+          "source" : "bbox",
+          "function" : "get_latlng_from_bbox",
+          "parameters" : "bbox"
+        },
         "additionalProperties": false
       }
     }
