@@ -64,10 +64,9 @@ def get_from_search(field, search_field, contains, return_field, item):
 
     Params:
       field: The field where the list is placed in the data item
-      lookup:
-        - field_search. the field to search on
-        - search contains. The value to match the search with
-        - field. the field containg the returning value
+      search_field: the field to search on
+      contains. The value to match the search with
+      return_field. the field containg the returning value
       item: the data record
     Return:
         The 'field' value from the sub-item containing the matching string in
@@ -90,10 +89,10 @@ def get_average(schema, index_list, item):
     Return:
         The average of the specified values inside the list
     """
+    total = 0.0
     addends = len(index_list)
     if addends < 1:
-        return 0.0
-    total = 0.0
+        return total
     item_array = get_from_schema(schema, item)
     for ndx in index_list:
         total += item_array[ndx]
