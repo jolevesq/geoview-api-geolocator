@@ -12,7 +12,7 @@ __Simple diagram__
 
 Sample call to the API:
 ```
-https://fr59c5usw4.execute-api.ca-central-1.amazonaws.com/dev?q=Meech%20lake&lang=en&keys=geonames,nominatim
+https://fr59c5usw4.execute-api.ca-central-1.amazonaws.com/dev?q=Meech lake&lang=en&keys=geonames,nominatim
 ```
 
 html

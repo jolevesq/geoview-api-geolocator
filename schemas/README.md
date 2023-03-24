@@ -109,7 +109,7 @@ Lookup can have several signatures:
     * search. The data should be found by searching in a data field containing
               a list of dictionaries where one must match an specific key/value tuple
 	* average. Calculate the average of a subset of numeric values from a field
-               containing a list of numerics (such as bbox)	
+               containing a list of numerics (such as bbox)
     * url. The data value comes from a table obtained from a url (deprecated)
 
 ### Response time

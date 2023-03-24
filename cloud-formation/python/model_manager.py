@@ -138,7 +138,7 @@ def get_function_from_schema(schema, item):
     elif schema_type == "search":
         return get_from_search
     elif schema_type == "average":
-        return get_average
+        return function_null
     elif schema_type == "url":
         return get_from_url
     else:
@@ -338,8 +338,13 @@ def apply_out_schema(parameters_tuple):
         value = item.get(key)
         # Validate required parameters
         if (key in schema_required) and (value is None):
-            value = ERR_ATTRIBUTE_NOT_FOUND
-            item[key] = value
+            try:
+                if key == "lat":
+                    item[key] = get_average("bbox", [1, 3], item)
+                if key == "lng":
+                    item[key] = get_average("bbox", [0, 2], item)
+            except:
+                item[key] = ERR_ATTRIBUTE_NOT_FOUND
         else:
             # Validate value against schema
             key_definition = schema_items.get(key)
@@ -361,7 +366,7 @@ def items_from_service(service, model, schema_items, schema_required, load):
       model: The model schema with tables to extract from
       schema_items: the section of the out-api schema to process the data layer
       schema_required: The section of the out-api schema to validate the
-                       presence of 'required' fields in the data layer
+                       prescence of 'required' fields in the data layer
       load: The input set of data items
 
     Return: A set of output items standarized and validated
