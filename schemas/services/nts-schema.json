@@ -19,12 +19,6 @@
                     "field": "properties.identifier",
                     "lookup": ""
                 },
-                "lat": {
-                    "field": ""
-                },
-                "lng": {
-                    "field": ""
-                },
                 "bbox": {
                     "field": "bbox",
                     "lookup": ""

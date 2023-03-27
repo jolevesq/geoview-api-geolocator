@@ -64,10 +64,9 @@ def get_from_search(field, search_field, contains, return_field, item):
 
     Params:
       field: The field where the list is placed in the data item
-      lookup:
-        - field_search. the field to search on
-        - search contains. The value to match the search with
-        - field. the field containg the returning value
+      search_field: the field to search on
+      contains. The value to match the search with
+      return_field. the field containg the returning value
       item: the data record
     Return:
         The 'field' value from the sub-item containing the matching string in
@@ -78,6 +77,26 @@ def get_from_search(field, search_field, contains, return_field, item):
         if contains in get_from_schema(search_field, sub_item):
             return sub_item.get(return_field)
     return None
+
+def get_average(schema, index_list, item):
+    """
+    Get the average of a set of values from a numeric array
+
+    Params:
+      schema: The schema or field name
+      indexes: A list with positions of each value for the addition
+      item: the data record
+    Return:
+        The average of the specified values inside the list
+    """
+    total = 0.0
+    addends = len(index_list)
+    if addends < 1:
+        return total
+    item_array = get_from_schema(schema, item)
+    for ndx in index_list:
+        total += item_array[ndx]
+    return total/addends
 
 def function_error():
     """
@@ -111,18 +130,19 @@ def get_function_from_schema(schema, item):
         return function_null
     if not lookup:
         return get_from_schema
+    schema_type = lookup.get("type")
+    if schema_type == "table":
+        return get_from_model_table
+    elif schema_type == "array":
+        return get_from_array
+    elif schema_type == "search":
+        return get_from_search
+    elif schema_type == "average":
+        return function_null
+    elif schema_type == "url":
+        return get_from_url
     else:
-        schema_type = lookup.get("type")
-        if schema_type == "table":
-            return get_from_model_table
-        elif schema_type == "array":
-            return get_from_array
-        elif schema_type == "search":
-            return get_from_search
-        elif schema_type == "url":
-            return get_from_url
-        else:
-            return function_error
+        return function_error
 
 def get_results(model, function_field, item):
     """
@@ -156,6 +176,10 @@ def get_results(model, function_field, item):
                         contains,
                         return_field,
                         item)
+    elif "get_average" in function.__name__:
+        field = item_schema.get("field")
+        ndx_list = item_schema.get("lookup").get("at")
+        return function(field, ndx_list, item)
     elif "function_null" in function.__name__:
         return function()
     else:
@@ -314,8 +338,13 @@ def apply_out_schema(parameters_tuple):
         value = item.get(key)
         # Validate required parameters
         if (key in schema_required) and (value is None):
-            value = ERR_ATTRIBUTE_NOT_FOUND
-            item[key] = value
+            try:
+                if key == "lat":
+                    item[key] = get_average("bbox", [1, 3], item)
+                if key == "lng":
+                    item[key] = get_average("bbox", [0, 2], item)
+            except:
+                item[key] = ERR_ATTRIBUTE_NOT_FOUND
         else:
             # Validate value against schema
             key_definition = schema_items.get(key)
@@ -337,7 +366,7 @@ def items_from_service(service, model, schema_items, schema_required, load):
       model: The model schema with tables to extract from
       schema_items: the section of the out-api schema to process the data layer
       schema_required: The section of the out-api schema to validate the
-                       presence of 'required' fields in the data layer
+                       prescence of 'required' fields in the data layer
       load: The input set of data items
 
     Return: A set of output items standarized and validated

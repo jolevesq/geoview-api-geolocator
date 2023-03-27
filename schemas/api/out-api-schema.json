@@ -89,7 +89,6 @@
       }
     }
   },
-
   "properties": {
     "geonames": {
       "type": "array",

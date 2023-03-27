@@ -1,13 +1,13 @@
 # Schemas and Metadata Structure
 
 Geolocator API is based on 'schemas' to define the way the application interacts with data. Different schemas are required to define the following tasks:
-    • Read and validate the parameters passed to the API-geolocator application. This include the keys (the available services) the query and language (when it's needed)
+    • Read and validate the parameters passed to the API-geolocator application. This include the keys (the available services), the query and the language (when it's needed)
 
     • Build valid url and parameters for consuming data on each specific geo-service
 
     • Extract the required information from the query and build standard response from it   
 
-    • Validate the extracted data falls into valid parameters (mainly numeric values)
+    • Validate that the extracted data falls into valid parameters (mainly numeric values)
 
 
 ### Geolocator API Schemas
@@ -33,7 +33,7 @@ The __output__ schemas validates the obtained values match type and limits for e
 each __service_id__ schema contains the rules to extract, adapt and validate the load data obtained after querying from that specific service.
 
 ### Supported API and services Metadata
-Each supported APIs and services may have differents input and output signatures. To help the parsing of these signatures, the Geolocator API will rely on JSON metadata file. This metadata file will also holds connection information like urls. The name of this file is the value of the key item (<key>-schema.json).
+Each supported APIs and services may have differents input and output signatures. To help the parsing of these signatures, the Geolocator API will rely on JSON metadata file. This metadata file will also holds connection information like urls. The name of this file is the value of the key item (<__service_id__>-schema.json).
 
 The structure of this files is:
 ```
@@ -108,7 +108,9 @@ Lookup can have several signatures:
     * array. The data value comes from an specific position in an array of values
     * search. The data should be found by searching in a data field containing
               a list of dictionaries where one must match an specific key/value tuple
-    * url. The data value comes from and table obtained from a url (deprecated)
+	* average. Calculate the average of a subset of numeric values from a field
+               containing a list of numerics (such as bbox)
+    * url. The data value comes from a table obtained from a url (deprecated)
 
 ### Response time
 The response time for the query depends on several factors:

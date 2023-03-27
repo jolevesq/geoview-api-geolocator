@@ -11,11 +11,13 @@ __Simple diagram__
 [Demo](https://jolevesq.github.io/geoview-api-geolocator/index.html)
 
 Sample call to the API:
-https://fr59c5usw4.execute-api.ca-central-1.amazonaws.com/dev?q=meech&lang=en&keys=geonames
+```
+https://fr59c5usw4.execute-api.ca-central-1.amazonaws.com/dev?q=Meech lake&lang=en&keys=geonames,nominatim
+```
 
-```html
+html
 The demo with embeded viewer is being loaded in public/index.html as a script tag
-
+```
 <script src="https://canadian-geospatial-platform.github.io/geoview/public/cgpv-main.js"></script>
 ```
 

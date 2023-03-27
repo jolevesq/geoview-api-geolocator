@@ -1,23 +1,23 @@
-# Python modules structure
+# Cloud Formation Scripts
 
-### Project Structure
+### Project modules
   The project contains the following python modules under the python folder:
 
-  • geolocator-lambda - The main module and entrance point to the back-end.
+  • __geolocator-lambda__ - The main module and entrance point to the back-end.
 
-  • s3-manager - Manage the lecture of AWS S3 bucket objects.
+  • __s3-manager__ - Manage the lecture of AWS S3 bucket objects.
 
-  • geolocator - Manage the persistence in memory of the application's schemas as well as a couple of tables in a read-once-use-many implementation.
+  • __geolocator__ - Manage the persistence in memory of the application's schemas as well as a couple of tables in a read-once-use-many implementation.
 
-  • params-manager - Contains the functions required to validate the geolocator parameters.
+  • __params-manager__ - Contains the functions required to validate the geolocator parameters.
 
-  • url-methods - Contains several methods related to the analysis and structure of urls and REST services.
+  • __url-methods__ - Contains several methods related to the analysis and structure of urls and REST services.
 
-  • model-manager - Contains all the functions required to interpret the raw data obtained from the services using the rules defined on the schemas.
+  • __model-manager__ - Contains all the functions required to interpret the raw data obtained from the services using the rules defined on the schemas.
 
-  • lambda-multiprocessing - Class required to implement multiprocessing
+  • __lambda-multiprocessing__ - Class required to implement multiprocessing
 
-  • constants - Constants and error messages strings
+  • __constants__ - Constants and error messages strings
 
 ###	Development, share and deploy
-  AWS, Visual Studio Code,git, npm.
+  AWS, Visual Studio Code, git, npm.
