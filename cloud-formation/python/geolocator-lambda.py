@@ -31,13 +31,14 @@ def lambda_handler(event, context):
     schemas = geolocator.get_schemas()
     # Extract IO schemas
     in_api_schema = schemas.get(IN_API)
-    out_api_schema = schemas.get(OUT_API)
-    output_schema = out_api_schema.get("definitions").get("output")
-    schema_items = output_schema.get("items").get("properties")
-    schema_required = output_schema.get("items").get("required")
+    output_schema_items = schemas.get(OUT_API). \
+                            get("definitions"). \
+                            get("output"). \
+                            get("items")
     # 0. Read and Validate the parameters
     params_full_list = validate_querystring_against_schema(event,in_api_schema)
     keys = params_full_list.pop("keys")
+    lang = params_full_list.get("lang")
     # services to call
     for service_id in keys:
         model = schemas.get(service_id)
@@ -45,13 +46,12 @@ def lambda_handler(event, context):
         # Adjust the parameters to the service's schema
         url, params = assemble_url(schema, params_full_list.copy())
         # At this point the query must be complete
-        service_load= url_request(url, params)
+        service_load = url_request(url, params)
         # At this point is where the 'out' part of each model applies
         items = items_from_service(service_id,
+                                   lang,
                                    model,
-                                   schema_items,
-                                   schema_required,
+                                   output_schema_items,
                                    service_load)
         loads.extend(items)
-
     return loads

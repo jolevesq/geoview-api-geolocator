@@ -1,6 +1,6 @@
 import json
-import lambda_multiprocessing
 import asyncio
+import lambda_multiprocessing
 from url_methods import *
 from constants import *
 
@@ -26,7 +26,7 @@ def get_from_schema(schema, item):
             return None
     return item
 
-def get_from_model_table(model, field, item):
+def get_from_model_table(model, lang, field, item):
     """
     Get the data value asociated with an specific field from a table inside the
     model
@@ -39,7 +39,8 @@ def get_from_model_table(model, field, item):
     Return:
         The field value from the array
     """
-    return model.get_from_table(field ,item)
+    code = get_from_schema(field, item)
+    return model.get_from_table(field, lang, code)
 
 def get_from_array(schema, lookup, item):
     """
@@ -138,13 +139,13 @@ def get_function_from_schema(schema, item):
     elif schema_type == "search":
         return get_from_search
     elif schema_type == "average":
-        return function_null
+        return get_average
     elif schema_type == "url":
         return get_from_url
     else:
         return function_error
 
-def get_results(model, function_field, item):
+def get_results(model, lang, function_field, item):
     """
     Apply the function asociated for each field to the item to
     extract the return value
@@ -161,7 +162,7 @@ def get_results(model, function_field, item):
     if "get_from_schema" in function.__name__:
         return function(item_schema.get("field"), item)
     elif "get_from_model_table" in function.__name__:
-        return function(model, item_schema.get("field"), item)
+        return function(model, lang, item_schema.get("field"), item)
     elif "get_from_array" in function.__name__:
         field = item_schema.get("field")
         lookup = item_schema.get("lookup")
@@ -216,7 +217,7 @@ def validate_against_schema(value, definition):
             return val, ""
         elif data_type == "array":
             if not isinstance(value,list):
-                if type(value) == int:
+                if isinstance(value, int):
                     value = str(value)
                 value = value.split(",")
             min_items = definition.get("minItems")
@@ -294,7 +295,11 @@ def get_functions(schema, item):
                 functions_by_field[key].append((schema_function, item_schema))
     return functions_by_field
 
-async def apply_service_schema(service, model, functions_by_field, data_item):
+async def apply_service_schema(service,
+                               lang,
+                               model,
+                               functions_by_field,
+                               data_item):
     """
     Extract the required information from each item based on the service model
 
@@ -310,13 +315,14 @@ async def apply_service_schema(service, model, functions_by_field, data_item):
     for key in functions_by_field:
         functions = functions_by_field.get(key)
         if len(functions) == 1:
-            item[key] = get_results(model, functions[0], data_item)
+            item[key] = get_results(model, lang, functions[0], data_item)
         else:
             result_list = []
             for function_field in functions:
                 result_list.append(get_results(model,
-                                   function_field,
-                                   data_item))
+                                               lang,
+                                               function_field,
+                                               data_item))
             item[key] = result_list
     return item
 
@@ -333,11 +339,13 @@ def apply_out_schema(parameters_tuple):
     Return: The item affected by the model where either absent default values
              or data errors are point out 
     """
-    schema_items, schema_required, item = parameters_tuple
-    for key in schema_items:
+    output_schema, item = parameters_tuple
+    output_fields = output_schema.get("properties")
+    output_required = output_schema.get("required")
+    for key in output_fields:
         value = item.get(key)
         # Validate required parameters
-        if (key in schema_required) and (value is None):
+        if (key in output_required) and (value is None):
             try:
                 if key == "lat":
                     item[key] = get_average("bbox", [1, 3], item)
@@ -347,7 +355,7 @@ def apply_out_schema(parameters_tuple):
                 item[key] = ERR_ATTRIBUTE_NOT_FOUND
         else:
             # Validate value against schema
-            key_definition = schema_items.get(key)
+            key_definition = output_fields.get(key)
             val, schema_error = validate_against_schema(value,
                                                         key_definition)
             if schema_error:
@@ -356,13 +364,18 @@ def apply_out_schema(parameters_tuple):
                 item[key] = val
     return item
 
-def items_from_service(service, model, schema_items, schema_required, load):
+def items_from_service(service,
+                       lang,
+                       model,
+                       output_schema,
+                       load):
     """
     Based on the output schema and api-out schema, return the formated
     data using multiprocessing to accelerate the task
 
     Params:
       service: The name of the service to put it ahead of the item's data
+      lang: Language for the code tables
       model: The model schema with tables to extract from
       schema_items: the section of the out-api schema to process the data layer
       schema_required: The section of the out-api schema to validate the
@@ -381,11 +394,13 @@ def items_from_service(service, model, schema_items, schema_required, load):
         # Readjust the item's data based on the service's schema
         for data_item in data_layer:
             item = asyncio.run(
-                apply_service_schema(service, model,
+                apply_service_schema(service,
+                                     lang,
+                                     model,
                                      functions_by_field,
                                      data_item))
             # Add the item to the list for the next process
-            list_to_process.append((schema_items, schema_required, item))
+            list_to_process.append((output_schema, item))
         num =len(list_to_process)
         # Apply the 'generic' out-api-schema to the item
         with lambda_multiprocessing.Pool(num) as process:
