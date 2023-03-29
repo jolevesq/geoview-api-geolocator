@@ -1,6 +1,5 @@
 import json
 import requests
-import urllib.request
 import asyncio
 
 def get_from_field(field, item):
@@ -82,7 +81,7 @@ def assemble_url(schema, params):
              service schema.
     """
     # 1. Extract url and parameters from json
-    url = schema.get("url")[:-1]
+    url = schema.get("url")
     url_params = schema.get("urlParams")
     # 2. Parameters to modify the url
     if url_params:
@@ -90,7 +89,6 @@ def assemble_url(schema, params):
     # 3. lookup in parameters to replace with
     qry_params_dict = params
     lookup_in = schema.get("lookup").get("in")
-    qry_params_list = []
     if lookup_in:
         for in_param in lookup_in:
             qry_params_dict[lookup_in.get(in_param)] = params.pop(in_param)

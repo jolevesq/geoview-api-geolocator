@@ -6,7 +6,7 @@
     "staticParams": {},
     "urlCodeTables": {
         "province" : {
-            "url": "https://geogratis.gc.ca/services/geoname/en/codes/province.json",
+            "url": "https://geogratis.gc.ca/services/geoname/_PARAM1_/codes/province.json",
             "type": "array",
             "name": "definitions",
             "fields": {
@@ -15,7 +15,7 @@
             }
         },
         "generic": {
-            "url": "https://geogratis.gc.ca/services/geoname/en/codes/generic.json",
+            "url": "https://geogratis.gc.ca/services/geoname/_PARAM1_/codes/generic.json",
             "type": "array",
             "name": "definitions",
             "fields": {
