@@ -1,5 +1,5 @@
-import boto3
 import csv
+import boto3
 from constants import *
 
 def get_s3_bucket():
@@ -50,22 +50,22 @@ def get_tables(bucket_name, tables_path):
     tables = {}
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(bucket_name)
-    for obj in bucket.objects.filter(Prefix=TABLES_PATH):
+    for obj in bucket.objects.filter(Prefix=tables_path):
         table_path = obj.key
         if table_path.endswith(CSV):
-            key = get_substring(table_path, TABLES_PATH, CSV)
+            key = get_substring(table_path, tables_path, CSV)
             file_body = read_file(bucket_name, table_path)
             data = file_body.splitlines()
             records = csv.reader(data)
             headers = next(records)
             codes = {}
-            headerCount = len(headers)
-            for eachRecord in records:
+            header_count = len(headers)
+            for each_record in records:
                 descr = {}
-                
-                for count in range(1,headerCount):
-                    descr[headers[count]] = eachRecord[count]
-                codes[eachRecord[0]] = descr
+
+                for count in range(1, header_count):
+                    descr[headers[count]] = each_record[count]
+                codes[each_record[0]] = descr
             tables[key] = codes
     return tables
 
