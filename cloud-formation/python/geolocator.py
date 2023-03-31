@@ -4,84 +4,6 @@ import botocore
 from constants import *
 from url_methods import url_request
 
-class Schema():
-    """
-    Defines the schema object for each service
-
-    Params:
-      object: Required to create the instance
-
-    Return: An instance with the schema for the service in json format,
-             As well as the tables required to fulfill some fields
-    """
-    # Attributes
-    _schema = ""
-    _tables = {}
-
-    # Init
-    def __init__(self, schema_json):
-        """
-        Create the instance of this object
-        """
-        self._schema = schema_json
-
-    # Methods
-    def get_schema(self):
-        """
-        Return this instance of the object
-        """
-        return self._schema
-
-    def read_url_code_tables(self):
-        """
-        Based on the schema, read from specific url(s) the data containing
-        the information required to build the list(s) in json format.
-        The tables are kept permanently in memory as attributes of each instance
-        """
-        schema_url_tables=self._schema.get("urlCodeTables")
-        if schema_url_tables:
-            for lang in [ "en", "fr" ]:
-                _lang_tables = {}
-                for key in schema_url_tables:
-                    table_content={}
-                    schema_define_table = schema_url_tables.get(key)
-                    url_table= schema_define_table.get("url")
-                    url_lang_table = url_table.replace("_PARAM1_", lang)
-                    ### This is just a temorary bypass ###
-                    if (lang=="fr") and (key=="generic"):
-                        url_lang_table = url_table.replace("_PARAM1_", "en")
-                    ######################################
-                    table_schema = url_request(url_lang_table, {})
-                    if schema_define_table.get("type")=="array":
-                        name_container=schema_define_table.get("name")
-                        items = table_schema.get(name_container)
-                        schema_fields=schema_define_table.get("fields")
-                        schema_code=schema_fields.get("code")
-                        schema_field=schema_fields.get("description")
-                        for item in items:
-                            code=item.get(schema_code)
-                            value=item.get(schema_field)
-                            table_content[code]=value
-                    _lang_tables[key]=table_content
-                self._tables[lang] = _lang_tables
-
-    def get_from_table(self, field, lang, code):
-        """
-        Identifies the table and record to get the value from
-
-        parameters:
-            field: contains two string values separated by point '.'.
-                - the first one is the name of the table (ditionary)
-                - The seconde one is the name of the field in the schema to
-                  look into in the table
-
-        return The value asociated to the code in this table
-        """
-        fields=field.split(".")
-        # table name
-        table_name=fields[0]
-        return self._tables.get(lang).get(table_name).get(code)
-
 # Singleton Class
 class Geolocator():
     """
@@ -97,6 +19,7 @@ class Geolocator():
     # Attributes
     _instance = None
     _schemas = {}
+    _tables = {}
 
     # Methods
     def __new__(cls):
@@ -109,6 +32,7 @@ class Geolocator():
             cls._instance = super(Geolocator, cls).__new__(cls)
             try:
                 cls.read_schemas(cls)
+                cls.read_tables(cls)
             except botocore.exceptions.ClientError as error:
                 print(error)
         return cls._instance
@@ -135,8 +59,20 @@ class Geolocator():
         for key in _out_api_properties:
             service_schema = s3_manager.read_file(bucket,_services_dict[key])
             #_schemas list of objects instead of string.json
-            self._schemas[key] = Schema(json.loads(service_schema))
-            self._schemas[key].read_url_code_tables()
+            self._schemas[key] = json.loads(service_schema)
+
+    def read_tables(self):
+        """
+        Read the tables from S3 service
+
+        Return: the tables required for scpecific fields in schemas
+        """
+        bucket = s3_manager.get_s3_bucket()
+        self._tables = s3_manager.get_tables(bucket, TABLES_PATH)
+        for table in self._tables:
+            print(f"table: {table}")
+            content_table = self._tables.get(table)
+            print(content_table)
 
     def get_schemas(self):
         """
@@ -145,3 +81,11 @@ class Geolocator():
         Return: A dictionary with all the read schemas
         """
         return self._schemas
+
+    def get_tables(self):
+        """
+        Method to get access to the tables
+
+        Return: The selected table from the dictionary
+        """
+        return self._tables

@@ -26,21 +26,24 @@ def get_from_schema(schema, item):
             return None
     return item
 
-def get_from_model_table(model, lang, field, item):
+def get_from_table(table_params, field, item):
     """
     Get the data value asociated with an specific field from a table inside the
     model
 
     Params:
-      schema: The schema or field name
-      lookup: the section of schema that defines the rules to extract the value
-              from item
+      table_params:
+        tables: The lookup tables for specific fields in schema
+        lang: The lang for the search
+      field: the nested fields to access the code
       item: the data record
     Return:
-        The field value from the array
+        The string corresponding to that table, code, language
     """
+    tables, lang = table_params
     code = get_from_schema(field, item)
-    return model.get_from_table(field, lang, code)
+    table_name = field.split('.')[0]
+    return tables.get(table_name).get(code).get(lang)
 
 def get_from_array(schema, lookup, item):
     """
@@ -133,7 +136,7 @@ def get_function_from_schema(schema, item):
         return get_from_schema
     schema_type = lookup.get("type")
     if schema_type == "table":
-        return get_from_model_table
+        return get_from_table
     elif schema_type == "array":
         return get_from_array
     elif schema_type == "search":
@@ -145,13 +148,15 @@ def get_function_from_schema(schema, item):
     else:
         return function_error
 
-def get_results(model, lang, function_field, item):
+def get_results(table_params, function_field, item):
     """
     Apply the function asociated for each field to the item to
     extract the return value
 
     Params:
-      model: The model schema with tables to extract from
+      table_params:
+        tables: The lookup tables for specific fields in schema
+        lang: The lang for the search
       function_field: Contains the function and the section of the schema
                       with the rules to obtain the value for that field
       item: the data item to obtain the value from
@@ -161,8 +166,8 @@ def get_results(model, lang, function_field, item):
     function, item_schema = function_field
     if "get_from_schema" in function.__name__:
         return function(item_schema.get("field"), item)
-    elif "get_from_model_table" in function.__name__:
-        return function(model, lang, item_schema.get("field"), item)
+    elif "get_from_table" in function.__name__:
+        return function(table_params, item_schema.get("field"), item)
     elif "get_from_array" in function.__name__:
         field = item_schema.get("field")
         lookup = item_schema.get("lookup")
@@ -296,8 +301,7 @@ def get_functions(schema, item):
     return functions_by_field
 
 async def apply_service_schema(service,
-                               lang,
-                               model,
+                               table_params,
                                functions_by_field,
                                data_item):
     """
@@ -305,7 +309,9 @@ async def apply_service_schema(service,
 
     Params:
       service: The name of the service to be added at the begging of each item
-      model: The model schema with tables to extract from
+      table_params:
+        tables: The lookup tables for specific fields in schema
+        lang: The lang for the search
       function_by_field: the list of field functions
       data_item: The item to be affected by the functions
 
@@ -315,12 +321,11 @@ async def apply_service_schema(service,
     for key in functions_by_field:
         functions = functions_by_field.get(key)
         if len(functions) == 1:
-            item[key] = get_results(model, lang, functions[0], data_item)
+            item[key] = get_results(table_params, functions[0], data_item)
         else:
             result_list = []
             for function_field in functions:
-                result_list.append(get_results(model,
-                                               lang,
+                result_list.append(get_results(table_params,
                                                function_field,
                                                data_item))
             item[key] = result_list
@@ -365,8 +370,8 @@ def apply_out_schema(parameters_tuple):
     return item
 
 def items_from_service(service,
-                       lang,
-                       model,
+                       table_params,
+                       service_schema,
                        output_schema,
                        load):
     """
@@ -375,8 +380,9 @@ def items_from_service(service,
 
     Params:
       service: The name of the service to put it ahead of the item's data
-      lang: Language for the code tables
-      model: The model schema with tables to extract from
+      table_params:
+        tables: The lookup tables for specific fields in schema
+        lang: The lang for the search
       schema_items: the section of the out-api schema to process the data layer
       schema_required: The section of the out-api schema to validate the
                        prescence of 'required' fields in the data layer
@@ -386,8 +392,8 @@ def items_from_service(service,
     """
     list_to_process = []
     loads = []
-    schema = model.get_schema()
-    schema_layer, data_layer = get_data_layer(schema, load)
+    #schema = model.get_schema()
+    schema_layer, data_layer = get_data_layer(service_schema, load)
     # Identify the process by field
     if len(data_layer) > 0:
         functions_by_field = get_functions(schema_layer, data_layer[0])
@@ -395,8 +401,7 @@ def items_from_service(service,
         for data_item in data_layer:
             item = asyncio.run(
                 apply_service_schema(service,
-                                     lang,
-                                     model,
+                                     table_params,
                                      functions_by_field,
                                      data_item))
             # Add the item to the list for the next process
