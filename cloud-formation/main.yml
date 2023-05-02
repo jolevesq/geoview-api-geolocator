@@ -1,0 +1,47 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  Environment:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /webpresence/environment
+    Description: SSM parameter name for environment
+Resources:
+  s3AccessPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: "s3AccessPolicy"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - "s3:*"
+            Resource: "*"
+  iamForLambda:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: "iamForLambda"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      ManagedPolicyArns: 
+        - !Sub "${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+        - !Ref s3AccessPolicy
+  geolocatorS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "geolocator-${Environment}"
+  apiLambdaFunctionPayloadZip:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: "geolocatorLambda-cf"
+      Handler: index.handler
+      Role: !GetAtt iamForLambda.Arn
+      Code:
+        S3Bucket: !Sub "geolocator-${Environment}"
+        S3Key: lambda_function_payload.zip
