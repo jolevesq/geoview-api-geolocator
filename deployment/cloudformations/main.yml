@@ -5,21 +5,10 @@ Parameters:
     Default: /webpresence/environment
     Description: SSM parameter name for environment
 Resources:
-  s3AccessPolicy:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyName: "s3AccessPolicy"
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Action:
-              - "s3:*"
-            Resource: "*"
   iamForLambda:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: "iamForLambda"
+      RoleName: iamForLambda
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -29,19 +18,22 @@ Resources:
                 - "lambda.amazonaws.com"
             Action:
               - "sts:AssumeRole"
-      ManagedPolicyArns: 
-        - !Sub "${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-        - !Ref s3AccessPolicy
-  geolocatorS3Bucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: !Sub "geolocator-${Environment}"
+      Policies:
+        - PolicyName: "s3-read-only"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "s3:GetObject"
+                Resource: "arn:aws:s3:::geolocator-${Environment}/*"
   apiLambdaFunctionPayloadZip:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: "geolocatorLambda-cf"
+      Runtime: python3.7
       Handler: index.handler
       Role: !GetAtt iamForLambda.Arn
       Code:
-        S3Bucket: !Sub "geolocator-${Environment}"
+        S3Bucket: !Sub "geolocator-${Environment}-cf-2"
         S3Key: lambda_function_payload.zip
