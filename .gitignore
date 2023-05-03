@@ -3,6 +3,7 @@
 */**/tsclib
 */**/dist
 dist/
+deployment/build-artifacts/*
 
 # Editor
 .vscode
