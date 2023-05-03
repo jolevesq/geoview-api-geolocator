@@ -10,6 +10,6 @@ then
   echo "Bucket name specified is less than 3 or greater than 63 characters"
 else
   echo "Bucket owned and exists";
-  aws cloudformation deploy --template-file s3-bucket.yml \
-  --stack-name pascal-geolocator-api-s3-bucket \
+  aws cloudformation deploy --template-file ./cloudformations/s3-bucket.yml \
+  --stack-name pascal-geolocator-api-s3-bucket;
 fi
