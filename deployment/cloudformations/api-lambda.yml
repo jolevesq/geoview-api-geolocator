@@ -4,6 +4,10 @@ Parameters:
     Type: AWS::SSM::Parameter::Value<String>
     Default: /webpresence/environment
     Description: SSM parameter name for environment
+  ApiLambdaKey:
+    Type: String
+    MinLength: 1
+    Description: The key for the zipped lambda in the s3 bucket
 Resources:
   iamForLambda:
     Type: AWS::IAM::Role
@@ -36,4 +40,4 @@ Resources:
       Role: !GetAtt iamForLambda.Arn
       Code:
         S3Bucket: !Sub "geolocator-${Environment}-cf-2"
-        S3Key: lambda_function_payload.zip
+        S3Key: !Sub ${ApiLambdaKey}
