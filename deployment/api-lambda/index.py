@@ -3,7 +3,7 @@ from params_manager import *
 from model_manager import *
 from constants import *
 
-def lambda_handler(event, context):
+def handler(event, context):
     """
     Main function. When called, performs specific actions in order to
           extract, adapt, and return REST data from several specific services.

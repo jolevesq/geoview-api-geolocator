@@ -6,5 +6,5 @@ aws s3 cp $API_LAMBDA_KEY s3://geolocator-dev-cf-2/$API_LAMBDA_KEY
 aws cloudformation deploy --template-file cloudformations/api-lambda.yml \
 --stack-name pascalGeolocatorLambda \
 --capabilities CAPABILITY_NAMED_IAM \
---parameter-overrides ApiLambdaKey=$API_LAMBDA_KEY
+--parameter-overrides ApiLambdaKey=$API_LAMBDA_KEY;
 echo "zip and deploy ending."
