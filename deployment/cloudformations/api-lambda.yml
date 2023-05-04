@@ -29,8 +29,8 @@ Resources:
             Statement:
               - Effect: "Allow"
                 Action:
-                  - "s3:GetObject"
-                Resource: !Sub "arn:aws:s3:::geolocator-${Environment}-cf-2/*"
+                  - "s3:*"
+                Resource: "*"
         - PolicyName: AWSLambdaBasicExecutionRole
           PolicyDocument:
             Version: "2012-10-17"
@@ -54,6 +54,8 @@ Resources:
       Environment:
         Variables:
           S3_BUCKET_NAME: !Sub "geolocator-${Environment}-cf-2"
+      Timeout: 30
+      MemorySize: 3009
 Outputs:
   apiLambdaFunctionArn:
     Value: !Sub "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${apiLambdaFunction.Arn}/invocations"
