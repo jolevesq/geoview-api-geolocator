@@ -55,7 +55,7 @@ Resources:
         Variables:
           S3_BUCKET_NAME: !Sub "geolocator-${Environment}-cf-2"
       Timeout: 30
-      MemorySize: 3009
+      MemorySize: 4096
 Outputs:
   apiLambdaFunctionArn:
     Value: !Sub "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${apiLambdaFunction.Arn}/invocations"
