@@ -15,8 +15,6 @@ else
   aws cloudformation deploy --template-file ./cloudformations/s3-bucket.yml \
   --stack-name pascal-geolocator-api-s3-bucket;
   bucket_name=$(aws cloudformation describe-stacks --stack-name pascal-geolocator-api-s3-bucket | jq -r '.Stacks[0].Outputs[] | select(.OutputKey=="BucketName") | .OutputValue');
-  echo "$bucket_name";
-  echo "bucket_name is";
   source ./scripts/deploy-bucket-content.sh "$bucket_name";
 fi
 echo "bucket deploy ending."
