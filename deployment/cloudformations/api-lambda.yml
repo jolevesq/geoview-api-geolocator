@@ -30,7 +30,7 @@ Resources:
               - Effect: "Allow"
                 Action:
                   - "s3:GetObject"
-                Resource: "arn:aws:s3:::geolocator-${Environment}/*"
+                Resource: !Sub "arn:aws:s3:::geolocator-${Environment}-cf-2/*"
   apiLambdaFunction:
     Type: AWS::Lambda::Function
     Properties:
@@ -41,6 +41,9 @@ Resources:
       Code:
         S3Bucket: !Sub "geolocator-${Environment}-cf-2"
         S3Key: !Sub ${ApiLambdaKey}
+      Environment:
+        Variables:
+          S3_BUCKET_NAME: !Sub "geolocator-${Environment}-cf-2"
 Outputs:
   apiLambdaFunctionArn:
     Value: !Sub "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${apiLambdaFunction.Arn}/invocations"
