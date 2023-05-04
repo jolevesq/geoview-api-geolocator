@@ -31,6 +31,16 @@ Resources:
                 Action:
                   - "s3:GetObject"
                 Resource: !Sub "arn:aws:s3:::geolocator-${Environment}-cf-2/*"
+        - PolicyName: AWSLambdaBasicExecutionRole
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub arn:${AWS::Partition}:logs:*:*:*
   apiLambdaFunction:
     Type: AWS::Lambda::Function
     Properties:
