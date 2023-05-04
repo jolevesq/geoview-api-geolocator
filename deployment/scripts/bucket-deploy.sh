@@ -1,3 +1,5 @@
+#!/bin/bash
+echo "bucket deploy starting."
 bucketstatus=$(aws s3api head-bucket --bucket "${s3_bucket}" 2>&1)
 if echo "${bucketstatus}" | grep 'Not Found';
 then
@@ -13,3 +15,4 @@ else
   aws cloudformation deploy --template-file ./cloudformations/s3-bucket.yml \
   --stack-name pascal-geolocator-api-s3-bucket;
 fi
+echo "bucket deploy ending."
