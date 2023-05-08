@@ -7,5 +7,6 @@
 3. [x] deploy lambda to bucket referencing zipped lambda.
 4. [x] deployed api that calls lambda
 5. [x] deployed api gives url that can be hit
+6. [ ] deployment is triggered by github action
 
-- [ ] set bucket name based on env for bucket creation.
+- [ ] set proper names for exported variables, bucket, etc.
