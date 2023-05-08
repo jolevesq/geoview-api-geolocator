@@ -38,4 +38,4 @@ Resources:
 
 Outputs:
   ApiEndpoint:
-    Value: !Sub "https://${RestApi}.execute-api.${AWS::Region}.amazonaws.com/prod/my-resource"
+    Value: !Sub "https://${RestApi}.execute-api.${AWS::Region}.amazonaws.com/{Environment}/my-resource"
