@@ -3,7 +3,7 @@
 ## Deployment steps
 
 1. configure your aws cli
-2. cd to the deploy folder and run the deploy script: `./deploy/sh`
+2. cd to the `backend` folder and run the deploy script: `./deploy.sh`
 
 ## To Do
 
