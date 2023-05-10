@@ -34,7 +34,7 @@ Resources:
       - Method
     Properties:
       RestApiId: !Ref RestApi
-      StageName: dev
+      StageName: !Sub ${Environment}
 
 Outputs:
   ApiEndpoint:
