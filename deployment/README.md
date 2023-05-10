@@ -1,12 +1,11 @@
 # Cloud Formation Script
 
-## steps
+## Deployment steps
 
-1. [x] check if bucket exists. if not create it.
-2. [x] zip lambda, give timestamped name and store in build artifacts folder
-3. [x] deploy lambda to bucket referencing zipped lambda.
-4. [x] deployed api that calls lambda
-5. [x] deployed api gives url that can be hit
-6. [ ] deployment is triggered by github action
+1. configure your aws cli
+2. cd to the deploy folder and run the deploy script: `./deploy/sh`
 
+## To Do
+
+- [ ] setup CI/CD based on AWS codepipeline.
 - [ ] set proper names for exported variables, bucket, etc.
