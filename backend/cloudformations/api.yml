@@ -8,14 +8,14 @@ Resources:
   RestApi:
     Type: AWS::ApiGateway::RestApi
     Properties:
-      Name: geoview-api
+      Name: GeolocatorApi
 
   RootResource:
     Type: AWS::ApiGateway::Resource
     Properties:
       RestApiId: !Ref RestApi
       ParentId: !GetAtt RestApi.RootResourceId
-      PathPart: my-resource
+      PathPart: geolocator
 
   Method:
     Type: AWS::ApiGateway::Method
@@ -27,7 +27,7 @@ Resources:
       Integration:
         Type: AWS_PROXY
         IntegrationHttpMethod: POST
-        Uri: !ImportValue pascalGeolocatorLambdaapiLambdaFunctionArn
+        Uri: !ImportValue GeolocatorApiLambdaFunctionArn
   Deployment:
     Type: AWS::ApiGateway::Deployment
     DependsOn:
