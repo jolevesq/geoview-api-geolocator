@@ -44,26 +44,28 @@ Resources:
   apiLambdaFunction:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: "geolocatorLambda-cf"
+      # Warning: FunctionName is hardcoded in ConfigLambdaPermission
+      FunctionName: "GeolocatorApiLambda"
       Runtime: python3.7
       Handler: index.handler
       Role: !GetAtt iamForLambda.Arn
       Code:
-        S3Bucket: !Sub "geolocator-${Environment}-cf-2"
+        S3Bucket: !ImportValue GeolocatorApiS3BucketName
         S3Key: !Sub ${ApiLambdaKey}
       Environment:
         Variables:
-          S3_BUCKET_NAME: !Sub "geolocator-${Environment}-cf-2"
+          S3_BUCKET_NAME: !ImportValue GeolocatorApiS3BucketName
       Timeout: 30
       MemorySize: 4096
   ConfigLambdaPermission:
     Type: "AWS::Lambda::Permission"
     Properties:
       Action: lambda:InvokeFunction
-      FunctionName: "geolocatorLambda-cf"
+      FunctionName: "GeolocatorApiLambda"
       Principal: apigateway.amazonaws.com
+    DependsOn: apiLambdaFunction
 Outputs:
   apiLambdaFunctionArn:
     Value: !Sub "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${apiLambdaFunction.Arn}/invocations"
     Export:
-      Name: !Sub "${AWS::StackName}apiLambdaFunctionArn"
+      Name: !Sub "${AWS::StackName}FunctionArn"

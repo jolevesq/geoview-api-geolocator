@@ -13,8 +13,8 @@ then
 else
   echo "Bucket owned and exists";
   aws cloudformation deploy --template-file ./cloudformations/s3-bucket.yml \
-  --stack-name pascal-geolocator-api-s3-bucket;
-  bucket_name=$(aws cloudformation describe-stacks --stack-name pascal-geolocator-api-s3-bucket | jq -r '.Stacks[0].Outputs[] | select(.OutputKey=="BucketName") | .OutputValue');
+  --stack-name GeolocatorApiS3Bucket;
+  bucket_name=$(aws cloudformation describe-stacks --stack-name GeolocatorApiS3Bucket | jq -r '.Stacks[0].Outputs[] | select(.OutputKey=="GeolocatorApiS3BucketName") | .OutputValue');
   source ./scripts/deploy-bucket-content.sh "$bucket_name";
 fi
 echo "bucket deploy ending."
