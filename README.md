@@ -52,3 +52,13 @@ $ npm run serve
 ```
 $ npm run build
 ```
+
+## React and React DOM dependencies
+
+These 2 librairies are included in the cgpv-main.js file that is referenced by the html page. To access it, add the lines below to your webpack file.
+```
+externals: {
+    react: 'cgpv.react',
+    'react-dom': 'cgpv.reactDOM',
+  },
+```

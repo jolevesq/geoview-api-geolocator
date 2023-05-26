@@ -1,9 +1,7 @@
-// import React, { useEffect, createContext, useState, useMemo } from 'react';
-import React, { useEffect } from 'react';
-
 import makeStyles from '@mui/styles/makeStyles';
 
 import { GeolocatorPanelContent } from './geolocator-content';
+import { useEffect } from 'react';
 
 import translationEn from '../../public/locales/en/translation.json';
 import translationFr from '../../public/locales/fr/translation.json';

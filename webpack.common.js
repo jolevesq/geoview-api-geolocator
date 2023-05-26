@@ -16,6 +16,10 @@ const config = {
     filename: '[name].js',
     chunkFilename: '[name].js',
   },
+  externals: {
+    react: 'cgpv.react',
+    'react-dom': 'cgpv.reactDOM',
+  },
   resolve: {
     extensions: ['.mjs', '.ts', '.tsx', '.js', '.jsx'],
   },

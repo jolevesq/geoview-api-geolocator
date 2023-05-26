@@ -1,10 +1,10 @@
 import { TypeButtonPanel, TypeWindow } from 'geoview-core-types';
+import { useLocation, BrowserRouter  } from 'react-router-dom';
+import { useState } from 'react';
 
 const w = window as TypeWindow;
 
 const cgpv = w['cgpv'];
-
-const { react } = cgpv;
 
 /**
  * Panel Content Properties
@@ -22,10 +22,8 @@ interface GeolocatorPanelContentProps {
  */
 export const GeolocatorPanelContent = (props: GeolocatorPanelContentProps): JSX.Element => {
   const { buttonPanel, mapId } = props;
+  const { ui } = cgpv;
 
-  const { ui, react } = cgpv;
-
-  const { useState, useEffect, useMemo } = react;
   const { TextField, Select, Autocomplete, Button, List, ListItem, ListItemText } = ui.elements;
 
   const [layerData, setLayerData] = useState([]);
@@ -57,7 +55,7 @@ export const GeolocatorPanelContent = (props: GeolocatorPanelContentProps): JSX.
   }
 
   async function getConvertedData(query: string): Promise<any> {
-    const url: string = 'https://fr59c5usw4.execute-api.ca-central-1.amazonaws.com/dev?';
+    const url: string = 'https://znwaxif9m9.execute-api.ca-central-1.amazonaws.com/stage/geolocator?';
     const strToFetch = url.concat(query);
     console.log(strToFetch);
     const response = await fetch(strToFetch);
@@ -72,12 +70,12 @@ export const GeolocatorPanelContent = (props: GeolocatorPanelContentProps): JSX.
 
   function zoomItem(coords: [number, number]) {
     console.log(`lat ${coords[1]}, long ${coords[0]}`)
-    const coordsProj = cgpv.api.projection.latLngToWm([coords[0], coords[1]])[0];
+    const coordsProj = (cgpv.api.projection as any).LngLatToWm([coords[0], coords[1]])[0];
     cgpv.api.maps.mapWM.getView().animate({ center: coordsProj, duration: 500, zoom: 11 });
   }
 
   return (
-    <>
+    <><BrowserRouter>
       <label htmlFor="filter">Search filter</label>
       <TextField id="filter" type="text" onChange={(e: any) => setQuery(e.target.value)} />
       <div style={{ display: 'grid', padding: '10px' }}>
@@ -126,6 +124,7 @@ export const GeolocatorPanelContent = (props: GeolocatorPanelContentProps): JSX.
           );
         })}
       </List>
+      </BrowserRouter>
     </>
   );
 };
