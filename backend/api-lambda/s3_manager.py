@@ -1,6 +1,7 @@
-import csv
 import boto3
+import csv
 from constants import *
+import os
 
 def get_s3_bucket():
     """
@@ -9,7 +10,7 @@ def get_s3_bucket():
     Return: The name of the bucket in S3
            # This name is just for developping and testing purposes
     """
-    return "dev-app-geolocator"
+    return os.environ.get('S3_BUCKET_NAME')
 
 def get_substring(string, start, end):
     """
@@ -50,22 +51,22 @@ def get_tables(bucket_name, tables_path):
     tables = {}
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(bucket_name)
-    for obj in bucket.objects.filter(Prefix=tables_path):
+    for obj in bucket.objects.filter(Prefix=TABLES_PATH):
         table_path = obj.key
         if table_path.endswith(CSV):
-            key = get_substring(table_path, tables_path, CSV)
+            key = get_substring(table_path, TABLES_PATH, CSV)
             file_body = read_file(bucket_name, table_path)
             data = file_body.splitlines()
             records = csv.reader(data)
             headers = next(records)
             codes = {}
-            header_count = len(headers)
-            for each_record in records:
+            headerCount = len(headers)
+            for eachRecord in records:
                 descr = {}
-
-                for count in range(1, header_count):
-                    descr[headers[count]] = each_record[count]
-                codes[each_record[0]] = descr
+                
+                for count in range(1,headerCount):
+                    descr[headers[count]] = eachRecord[count]
+                codes[eachRecord[0]] = descr
             tables[key] = codes
     return tables
 

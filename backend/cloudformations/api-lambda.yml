@@ -1,0 +1,71 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  Environment:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /webpresence/environment
+    Description: SSM parameter name for environment
+  ApiLambdaKey:
+    Type: String
+    MinLength: 1
+    Description: The key for the zipped lambda in the s3 bucket
+Resources:
+  iamForLambda:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: iamForLambda
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Policies:
+        - PolicyName: "s3-read-only"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "s3:*"
+                Resource: "*"
+        - PolicyName: AWSLambdaBasicExecutionRole
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub arn:${AWS::Partition}:logs:*:*:*
+  apiLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      # Warning: FunctionName is hardcoded in ConfigLambdaPermission
+      FunctionName: "GeolocatorApiLambda"
+      Runtime: python3.7
+      Handler: index.handler
+      Role: !GetAtt iamForLambda.Arn
+      Code:
+        S3Bucket: !ImportValue GeolocatorApiS3BucketName
+        S3Key: !Sub ${ApiLambdaKey}
+      Environment:
+        Variables:
+          S3_BUCKET_NAME: !ImportValue GeolocatorApiS3BucketName
+      Timeout: 30
+      MemorySize: 4096
+  ConfigLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: "GeolocatorApiLambda"
+      Principal: apigateway.amazonaws.com
+    DependsOn: apiLambdaFunction
+Outputs:
+  apiLambdaFunctionArn:
+    Value: !Sub "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${apiLambdaFunction.Arn}/invocations"
+    Export:
+      Name: !Sub "${AWS::StackName}FunctionArn"

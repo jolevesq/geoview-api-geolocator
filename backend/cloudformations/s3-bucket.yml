@@ -1,0 +1,17 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  Environment:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /webpresence/environment
+    Description: SSM parameter name for environment
+Resources:
+  geolocatorS3Bucket:
+    Type: AWS::S3::Bucket
+    # DeletionPolicy: Retain
+    Properties:
+      BucketName: !Sub "geolocator-api-${Environment}"
+Outputs:
+  GeolocatorApiS3BucketName:
+    Value: !Ref geolocatorS3Bucket
+    Export:
+      Name: GeolocatorApiS3BucketName

@@ -69,7 +69,8 @@ class Geolocator():
         """
         bucket = s3_manager.get_s3_bucket()
         self._tables = s3_manager.get_tables(bucket, TABLES_PATH)
-
+        for table in self._tables:
+            content_table = self._tables.get(table)
     def get_schemas(self):
         """
         Method to get access to the schemas
