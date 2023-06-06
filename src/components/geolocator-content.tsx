@@ -1,6 +1,11 @@
 import { TypeButtonPanel, TypeWindow } from 'geoview-core-types';
-import { useLocation, BrowserRouter  } from 'react-router-dom';
-import { useState } from 'react';
+import { useLocation, BrowserRouter } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { useState, useContext } from 'react';
+
+
+
+import { AppContext } from '../index';
 
 const w = window as TypeWindow;
 
@@ -21,6 +26,9 @@ interface GeolocatorPanelContentProps {
  * @returns {JSX.Element} the new create panel content
  */
 export const GeolocatorPanelContent = (props: GeolocatorPanelContentProps): JSX.Element => {
+
+  const appContext = useContext(AppContext);
+  const dispatch = appContext.store.dispatch; //useDispatch();
   const { buttonPanel, mapId } = props;
   const { ui } = cgpv;
 
@@ -69,61 +77,62 @@ export const GeolocatorPanelContent = (props: GeolocatorPanelContentProps): JSX.
   }
 
   function zoomItem(coords: [number, number]) {
-    console.log(`lat ${coords[1]}, long ${coords[0]}`)
+    console.log(`lat ${coords[1]}, long ${coords[0]}`);
     const coordsProj = (cgpv.api.projection as any).LngLatToWm([coords[0], coords[1]])[0];
     cgpv.api.maps.mapWM.getView().animate({ center: coordsProj, duration: 500, zoom: 11 });
   }
 
   return (
-    <><BrowserRouter>
-      <label htmlFor="filter">Search filter</label>
-      <TextField id="filter" type="text" onChange={(e: any) => setQuery(e.target.value)} />
-      <div style={{ display: 'grid', padding: '10px' }}>
-        <label htmlFor="language">Language filter (optional)</label>
-        <Select
-          id="language"
-          value={language}
-          onChange={(e: any) => setLanguage(e.target.value)}
-          inputLabel={{
-            id: 'select-variable',
-          }}
-          menuItems={languages.map(([value, label]) => ({
-            key: value,
-            item: {
-              value,
-              children: label,
-            },
-          }))}
+    <>
+      <BrowserRouter>
+        <label htmlFor="filter">Search filter</label>
+        <TextField id="filter" type="text" onChange={(e: any) => setQuery(e.target.value)} />
+        <div style={{ display: 'grid', padding: '10px' }}>
+          <label htmlFor="language">Language filter (optional)</label>
+          <Select
+            id="language"
+            value={language}
+            onChange={(e: any) => setLanguage(e.target.value)}
+            inputLabel={{
+              id: 'select-variable',
+            }}
+            menuItems={languages.map(([value, label]) => ({
+              key: value,
+              item: {
+                value,
+                children: label,
+              },
+            }))}
+          />
+        </div>
+        <Autocomplete
+          style={{ display: 'grid', paddingBottom: '20px' }}
+          fullWidth
+          multiple={true}
+          disableCloseOnSelect
+          disableClearable={false}
+          id="service-key"
+          options={serviceKeys}
+          getOptionLabel={(option) => `${option[1]} (${option[0]})`}
+          renderOption={(props, option) => <span {...props}>{option[1]}</span>}
+          onChange={handleServices as any}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          renderInput={(params) => <TextField {...params} label="Select Service keys" />}
         />
-      </div>
-      <Autocomplete
-        style={{ display: 'grid', paddingBottom: '20px' }}
-        fullWidth
-        multiple={true}
-        disableCloseOnSelect
-        disableClearable={false}
-        id="service-key"
-        options={serviceKeys}
-        getOptionLabel={(option) => `${option[1]} (${option[0]})`}
-        renderOption={(props, option) => <span {...props}>{option[1]}</span>}
-        onChange={handleServices as any}
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        renderInput={(params) => <TextField {...params} label="Select Service keys" />}
-      />
-      <Button tooltip="Process Data" tooltipPlacement="right" type="text" variant="contained" onClick={() => callGeolocator()}>
-        Process Data
-      </Button>
-      <List>
-        {layerData.map((layerData) => {
-          return (
-            <div key={layerData}>
-              <ListItem onClick={() => zoomItem([(layerData as any).lng, (layerData as any).lat])}>
-                <ListItemText primary={(layerData as any).name} nonce={undefined} />
-              </ListItem>
-            </div>
-          );
-        })}
-      </List>
+        <Button tooltip="Process Data" tooltipPlacement="right" type="text" variant="contained" onClick={() => callGeolocator()}>
+          Process Data
+        </Button>
+        <List>
+          {layerData.map((layerData) => {
+            return (
+              <div key={layerData}>
+                <ListItem onClick={() => zoomItem([(layerData as any).lng, (layerData as any).lat])}>
+                  <ListItemText primary={(layerData as any).name} nonce={undefined} />
+                </ListItem>
+              </div>
+            );
+          })}
+        </List>
       </BrowserRouter>
     </>
   );

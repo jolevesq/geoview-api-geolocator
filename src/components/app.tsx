@@ -1,13 +1,15 @@
 import makeStyles from '@mui/styles/makeStyles';
 
 import { GeolocatorPanelContent } from './geolocator-content';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
 
 import translationEn from '../../public/locales/en/translation.json';
 import translationFr from '../../public/locales/fr/translation.json';
 
 import {
   TypeIconButtonProps,
+  TypeButtonPanel,
   TypePanelProps,
   TypeWindow,
 } from 'geoview-core-types';
@@ -34,7 +36,9 @@ const useStyles = makeStyles((theme) => ({
  */
 const App = (): JSX.Element => {
   const classes = useStyles();
+  const dispatch = useDispatch();
 
+  const [geoPanel, setgeoPanel] = useState<TypeButtonPanel>()
   /**
    * initialize the map after it has been loaded
    */
@@ -73,7 +77,7 @@ const App = (): JSX.Element => {
 
       const MapIcon = cgpv.ui.elements.MapIcon;
 
-      // button props
+      // // button props
       const geolocatorButton: TypeIconButtonProps = {
         // set ID so that it can be accessed from the core viewer
         id: 'geolocatorButtonPanel',
@@ -95,6 +99,8 @@ const App = (): JSX.Element => {
         .map('mapWM')
         .appBarButtons.createAppbarPanel(geolocatorButton, geolocatorPanel, null);
 
+        // setgeoPanel(geolocatorButtonPanel)
+
       // set panel content
       geolocatorButtonPanel?.panel?.changeContent(
         <GeolocatorPanelContent buttonPanel={geolocatorButtonPanel} mapId={'mapWM'} />,
@@ -103,6 +109,8 @@ const App = (): JSX.Element => {
   }, []);
 
   return (
+    <>
+    {/* <GeolocatorPanelContent mapId='mapWM' buttonPanel={geoPanel}></GeolocatorPanelContent> */}
     <div
       id="mapWM"
       className={`llwp-map ${classes.container}`}
@@ -130,6 +138,7 @@ const App = (): JSX.Element => {
         'suportedLanguages': ['en', 'fr']
         }"
     ></div>
+    </>
   );
 };
 

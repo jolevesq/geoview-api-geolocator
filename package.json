@@ -21,7 +21,9 @@
     "@mui/material": "^5.5.0",
     "@mui/styles": "^5.5.0",
     "geoview-core-types": "github:Canadian-Geospatial-Platform/geoview#types",
-    "react-router-dom": "6.11.2"
+    "react-router-dom": "6.11.2",
+    "react-redux": "^7.2.2",
+    "@reduxjs/toolkit": "^1.9.5"
   },
   "devDependencies": {
     "@babel/core": "^7.17.5",
@@ -29,8 +31,9 @@
     "@babel/preset-env": "^7.16.11",
     "@babel/preset-react": "^7.16.7",
     "@babel/preset-typescript": "^7.16.7",
-    "@types/react": "^17.0.59",
+    "@types/react": "^17.0.2",
     "@types/react-dom": "^17.0.11",
+    "@types/react-redux": "7.1.25",
     "babel-loader": "^8.2.3",
     "copy-webpack-plugin": "^10.2.4",
     "css-loader": "^6.6.0",

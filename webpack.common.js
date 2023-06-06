@@ -33,11 +33,7 @@ const config = {
             loader: 'babel-loader',
             options: {
               plugins: ['@babel/transform-runtime'],
-              presets: [
-                '@babel/preset-env',
-                ['@babel/preset-react', { runtime: 'automatic' }],
-                '@babel/preset-typescript',
-              ],
+              presets: ['@babel/preset-env', ['@babel/preset-react', { runtime: 'automatic' }], '@babel/preset-typescript'],
             },
           },
         ],
@@ -64,10 +60,7 @@ const config = {
       title: 'GeoView Geolocator API Demo',
     }),
     new CopyWebpackPlugin({
-      patterns: [
-        { from: './public/locales', to: 'locales', noErrorOnMissing: true },
-        { from: './public/favicon.ico' },
-      ],
+      patterns: [{ from: './public/locales', to: 'locales', noErrorOnMissing: true }, { from: './public/favicon.ico' }],
     }),
   ],
 };
